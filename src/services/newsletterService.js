@@ -20,7 +20,7 @@ const newsletterService = {
    * @returns {Promise<Object>} Unsubscribe response
    */
   async unsubscribe(email) {
-    const response = await apiClient.post('/newsletter/unsubscribe', { email });
+    const response = await apiClient.delete('/newsletter/unsubscribe', { data: { email } });
     return response.data;
   },
 
