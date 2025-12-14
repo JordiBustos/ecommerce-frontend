@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Box,
@@ -28,14 +28,10 @@ const HomePage = () => {
   const [bestSelling, setBestSelling] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadBestSelling();
-  }, []);
-
   /**
    * Load best selling products
    */
-  const loadBestSelling = async () => {
+  const loadBestSelling = useCallback(async () => {
     try {
       setLoading(true);
       const data = await productService.getBestSelling();
@@ -45,7 +41,11 @@ const HomePage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [enqueueSnackbar]);
+
+  useEffect(() => {
+    loadBestSelling();
+  }, [loadBestSelling]);
 
   /**
    * Handle add to cart from carousel
