@@ -39,7 +39,8 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
 
   useEffect(() => {
     setIsFav(isAuthenticated ? isFavorite(product.id) : false);
-  }, [favorites, isAuthenticated, product.id, isFavorite]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favorites, isAuthenticated, product.id]);
 
   const handleDecrement = () => {
     if (quantity > 1) {
@@ -291,7 +292,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
                 },
               }}
             >
-              AGREGAR
+              ADD TO CART
             </Button>
           </Box>
         )}

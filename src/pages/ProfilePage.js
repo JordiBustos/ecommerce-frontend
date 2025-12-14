@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Box,
@@ -26,6 +26,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useSnackbar } from 'notistack';
 import addressService from '../services/addressService';
 import newsletterService from '../services/newsletterService';
+import { validateEmail, validatePhone, validateDNI, validatePostalCode, parseAPIError } from '../utils/security';
 
 /**
  * Profile page component
@@ -64,6 +65,34 @@ const ProfilePage = () => {
     is_default: false,
   });
 
+  /**
+   * Load user addresses
+   */
+  const loadAddresses = useCallback(async () => {
+    try {
+      setAddressLoading(true);
+      const data = await addressService.getAddresses();
+      setAddresses(data);
+    } catch (error) {
+      enqueueSnackbar('Failed to load addresses', { variant: 'error' });
+    } finally {
+      setAddressLoading(false);
+    }
+  }, [enqueueSnackbar]);
+
+  /**
+   * Check newsletter subscription status
+   */
+  const checkNewsletterStatus = useCallback(async () => {
+    try {
+      const status = await newsletterService.getStatus();
+      setNewsletterSubscribed(status.subscribed || false);
+    } catch (error) {
+      // User might not be subscribed yet
+      setNewsletterSubscribed(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -77,35 +106,7 @@ const ProfilePage = () => {
     }
     loadAddresses();
     checkNewsletterStatus();
-  }, [user]);
-
-  /**
-   * Load user addresses
-   */
-  const loadAddresses = async () => {
-    try {
-      setAddressLoading(true);
-      const data = await addressService.getAddresses();
-      setAddresses(data);
-    } catch (error) {
-      enqueueSnackbar('Failed to load addresses', { variant: 'error' });
-    } finally {
-      setAddressLoading(false);
-    }
-  };
-
-  /**
-   * Check newsletter subscription status
-   */
-  const checkNewsletterStatus = async () => {
-    try {
-      const status = await newsletterService.getStatus();
-      setNewsletterSubscribed(status.subscribed || false);
-    } catch (error) {
-      // User might not be subscribed yet
-      setNewsletterSubscribed(false);
-    }
-  };
+  }, [user, loadAddresses, checkNewsletterStatus]);
 
   /**
    * Handle newsletter subscription toggle
@@ -153,12 +154,36 @@ const ProfilePage = () => {
     setSuccess(false);
     setError('');
 
+    // Validate email
+    if (formData.email && !validateEmail(formData.email)) {
+      setError('Invalid email address');
+      enqueueSnackbar('Invalid email address', { variant: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    // Validate phone number
+    if (formData.phone_number && !validatePhone(formData.phone_number)) {
+      setError('Invalid phone number');
+      enqueueSnackbar('Invalid phone number', { variant: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    // Validate DNI
+    if (formData.dni && !validateDNI(formData.dni)) {
+      setError('Invalid DNI format');
+      enqueueSnackbar('Invalid DNI format', { variant: 'error' });
+      setLoading(false);
+      return;
+    }
+
     try {
       await updateUser(formData);
       setSuccess(true);
       enqueueSnackbar('Profile updated successfully', { variant: 'success' });
     } catch (err) {
-      const errorMsg = 'Failed to update profile';
+      const errorMsg = parseAPIError(err, 'Failed to update profile');
       setError(errorMsg);
       enqueueSnackbar(errorMsg, { variant: 'error' });
     } finally {
@@ -224,6 +249,44 @@ const ProfilePage = () => {
    * Handle address submit
    */
   const handleAddressSubmit = async () => {
+    // Validate required fields
+    if (!addressFormData.full_name?.trim()) {
+      enqueueSnackbar('Full name is required', { variant: 'error' });
+      return;
+    }
+
+    if (!addressFormData.country?.trim()) {
+      enqueueSnackbar('Country is required', { variant: 'error' });
+      return;
+    }
+
+    if (!addressFormData.postal_code?.trim()) {
+      enqueueSnackbar('Postal code is required', { variant: 'error' });
+      return;
+    }
+
+    // Validate postal code format
+    if (!validatePostalCode(addressFormData.postal_code)) {
+      enqueueSnackbar('Invalid postal code format', { variant: 'error' });
+      return;
+    }
+
+    if (!addressFormData.city?.trim()) {
+      enqueueSnackbar('City is required', { variant: 'error' });
+      return;
+    }
+
+    if (!addressFormData.address_line1?.trim()) {
+      enqueueSnackbar('Address is required', { variant: 'error' });
+      return;
+    }
+
+    // Validate phone number
+    if (addressFormData.phone_number && !validatePhone(addressFormData.phone_number)) {
+      enqueueSnackbar('Invalid phone number format', { variant: 'error' });
+      return;
+    }
+
     try {
       if (editingAddress) {
         await addressService.updateAddress(editingAddress.id, addressFormData);
@@ -235,7 +298,8 @@ const ProfilePage = () => {
       await loadAddresses();
       handleAddressDialogClose();
     } catch (error) {
-      enqueueSnackbar('Failed to save address', { variant: 'error' });
+      const errorMsg = parseAPIError(error, 'Failed to save address');
+      enqueueSnackbar(errorMsg, { variant: 'error' });
     }
   };
 

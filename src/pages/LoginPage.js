@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { parseAPIError } from '../utils/security';
 
 /**
  * Login page component
@@ -52,9 +53,7 @@ const LoginPage = () => {
       await login(formData);
       navigate('/');
     } catch (err) {
-      setError(
-        err.response?.data?.detail || 'Failed to login. Please check your credentials.'
-      );
+      setError(parseAPIError(err, 'Failed to login. Please check your credentials.'));
     } finally {
       setLoading(false);
     }

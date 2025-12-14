@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Grid,
@@ -38,6 +38,7 @@ const ProductsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -52,11 +53,38 @@ const ProductsPage = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   /**
+   * Load categories and brands
+   */
+  const loadFilters = useCallback(async () => {
+    try {
+      const [categoriesData, brandsData] = await Promise.all([
+        productService.getCategories(),
+        productService.getBrands(),
+      ]);
+      setCategories(categoriesData);
+      setBrands(brandsData);
+    } catch (err) {
+      enqueueSnackbar("Failed to load filters", { variant: "error" });
+    }
+  }, [enqueueSnackbar]);
+
+  /**
+   * Debounce search input to avoid spamming requests
+   */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  /**
    * Load categories and brands on mount
    */
   useEffect(() => {
     loadFilters();
-  }, []);
+  }, [loadFilters]);
 
   /**
    * Handle URL category parameter
@@ -69,37 +97,12 @@ const ProductsPage = () => {
         setSelectedCategories([numericCategoryId]);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, categories]);
-
-  /**
-   * Load products when filters or page change
-   */
-  useEffect(() => {
-    loadProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategories, selectedBrands, page]);
-
-  /**
-   * Load categories and brands
-   */
-  const loadFilters = async () => {
-    try {
-      const [categoriesData, brandsData] = await Promise.all([
-        productService.getCategories(),
-        productService.getBrands(),
-      ]);
-      setCategories(categoriesData);
-      setBrands(brandsData);
-    } catch (err) {
-      enqueueSnackbar("Failed to load filters", { variant: "error" });
-    }
-  };
+  }, [searchParams, categories, selectedCategories]);
 
   /**
    * Load products
    */
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -147,15 +150,14 @@ const ProductsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, searchQuery, selectedCategories, selectedBrands, enqueueSnackbar]);
 
   /**
-   * Handle search
+   * Load products when filters or page change
    */
-  const handleSearch = async () => {
-    setPage(1); // Reset to first page
+  useEffect(() => {
     loadProducts();
-  };
+  }, [loadProducts]);
 
   /**
    * Handle category filter change
@@ -358,18 +360,10 @@ const ProductsPage = () => {
           <TextField
             fullWidth
             placeholder="Search by name, description, SKU, EAN, category, or brand..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             size="small"
           />
-          <Button
-            variant="contained"
-            onClick={handleSearch}
-            sx={{ minWidth: 100 }}
-          >
-            Search
-          </Button>
           {hasActiveFilters && (
             <Button
               variant="outlined"

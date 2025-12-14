@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Typography,
@@ -51,14 +51,10 @@ const OrderDetailPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    loadOrder();
-  }, [orderId]);
-
   /**
    * Load order details
    */
-  const loadOrder = async () => {
+  const loadOrder = useCallback(async () => {
     try {
       setLoading(true);
       const data = await orderService.getOrder(orderId);
@@ -91,7 +87,11 @@ const OrderDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId, enqueueSnackbar, navigate]);
+
+  useEffect(() => {
+    loadOrder();
+  }, [loadOrder]);
 
   /**
    * Handle file selection

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -7,7 +7,6 @@ import {
   TextField,
   Button,
   IconButton,
-  Link,
   Paper,
   Divider,
 } from '@mui/material';
@@ -17,38 +16,30 @@ import {
   Instagram as InstagramIcon,
   LinkedIn as LinkedInIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { useStore } from '../contexts/StoreContext';
 import productService from '../services/productService';
 import newsletterService from '../services/newsletterService';
+import useDataFetching from '../hooks/useDataFetching';
+import ScrollLink from './ScrollLink';
 
 /**
  * Footer component with newsletter subscription and site navigation
  */
 const Footer = () => {
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { storeSettings } = useStore();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  /**
-   * Load categories
-   */
-  const loadCategories = async () => {
-    try {
+  
+  // Use custom hook for fetching categories
+  const { data: categories = [] } = useDataFetching(
+    async () => {
       const data = await productService.getCategories();
-      setCategories(data.slice(0, 5)); // Show only first 5
-    } catch (error) {
-      console.error('Failed to load categories');
-    }
-  };
+      return data.slice(0, 5); // Show only first 5
+    },
+    []
+  );
 
   /**
    * Handle newsletter subscription
@@ -76,12 +67,12 @@ const Footer = () => {
   /**
    * Social media links from store settings
    */
-  const socialMedia = [
+  const socialMedia = Array.isArray(storeSettings) ? [] : [
     { icon: <FacebookIcon />, name: 'Facebook', url: storeSettings?.facebook_url },
     { icon: <InstagramIcon />, name: 'Instagram', url: storeSettings?.instagram_url },
     { icon: <TwitterIcon />, name: 'Twitter', url: storeSettings?.twitter_url },
     { icon: <LinkedInIcon />, name: 'LinkedIn', url: storeSettings?.linkedin_url },
-  ].filter(social => social.url);
+  ].filter(social => social?.url);
 
   return (
     <Box
@@ -192,54 +183,38 @@ const Footer = () => {
               Navega
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Link
-                component="button"
-                variant="body2"
+              <ScrollLink
+                to="/products"
+                variant="link"
                 color="text.secondary"
-                onClick={() => {
-                  navigate('/products');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                sx={{ textAlign: 'left', textDecoration: 'none' }}
+                sx={{ textAlign: 'left' }}
               >
                 Productos
-              </Link>
-              <Link
-                component="button"
-                variant="body2"
+              </ScrollLink>
+              <ScrollLink
+                to="/favorites"
+                variant="link"
                 color="text.secondary"
-                onClick={() => {
-                  navigate('/favorites');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                sx={{ textAlign: 'left', textDecoration: 'none' }}
+                sx={{ textAlign: 'left' }}
               >
                 Favoritos
-              </Link>
-              <Link
-                component="button"
-                variant="body2"
+              </ScrollLink>
+              <ScrollLink
+                to="/privacy-policy"
+                variant="link"
                 color="text.secondary"
-                onClick={() => {
-                  navigate('/privacy-policy');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                sx={{ textAlign: 'left', textDecoration: 'none' }}
+                sx={{ textAlign: 'left' }}
               >
                 Política de privacidad
-              </Link>
-              <Link
-                component="button"
-                variant="body2"
+              </ScrollLink>
+              <ScrollLink
+                to="/shipping-policy"
+                variant="link"
                 color="text.secondary"
-                onClick={() => {
-                  navigate('/shipping-policy');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                sx={{ textAlign: 'left', textDecoration: 'none' }}
+                sx={{ textAlign: 'left' }}
               >
                 Política de envío
-              </Link>
+              </ScrollLink>
             </Box>
           </Grid>
 
@@ -249,21 +224,23 @@ const Footer = () => {
               Categorías
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  component="button"
-                  variant="body2"
-                  color="text.secondary"
-                  onClick={() => {
-                    navigate(`/products?category=${category.id}`);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  sx={{ textAlign: 'left', textDecoration: 'none' }}
-                >
-                  {category.name}
-                </Link>
-              ))}
+              {Array.isArray(categories) && categories.length > 0 ? (
+                categories.map((category) => (
+                  <ScrollLink
+                    key={category.id}
+                    to={`/products?category=${category.id}`}
+                    variant="link"
+                    color="text.secondary"
+                    sx={{ textAlign: 'left' }}
+                  >
+                    {category.name}
+                  </ScrollLink>
+                ))
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  Cargando...
+                </Typography>
+              )}
             </Box>
           </Grid>
 

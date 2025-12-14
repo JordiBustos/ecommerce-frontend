@@ -11,6 +11,20 @@ Modern React.js e-commerce application built with Material-UI.
 - User profile and addresses
 - Favorites/wishlist
 - Newsletter subscription
+- **Comprehensive security** (XSS protection, CSRF tokens, rate limiting)
+- **Secure token storage** (encrypted, auto-refresh)
+
+## Security Features
+
+🔒 This application implements industry-standard security measures:
+
+- **XSS Protection**: Input sanitization and HTML escaping
+- **CSRF Protection**: Token-based validation for state-changing requests
+- **Secure Authentication**: Encrypted token storage, automatic refresh
+- **Rate Limiting**: Brute force attack prevention
+- **Input Validation**: Email, password, phone, URL validation
+- **Security Headers**: X-Frame-Options, X-Content-Type-Options, X-XSS-Protection
+
 
 ## Tech Stack
 
@@ -43,9 +57,9 @@ The app will open at [http://localhost:3000](http://localhost:3000)
 
 ```
 src/
-├── components/     # Reusable UI components
+├── components/     # Reusable UI components (EmptyState, LoadingState, DataTable, etc.)
 ├── contexts/       # React Context providers
-├── hooks/          # Custom React hooks
+├── hooks/          # Custom React hooks (useDataFetching, useForm)
 ├── pages/          # Page components
 ├── services/       # API services
 ├── utils/          # Utility functions
@@ -53,12 +67,22 @@ src/
 └── App.js          # Root component
 ```
 
+## Design Patterns
+
+This project implements several design patterns for code reusability and maintainability:
+
+- **Composite Pattern**: EmptyState component for flexible UI composition
+- **Hook Pattern**: Custom hooks (useDataFetching, useForm) for reusable logic
+- **Strategy Pattern**: ScrollLink for consistent navigation behavior
+- **Template Method Pattern**: DataTable for reusable tables
+
 ## Available Scripts
 
 - `npm start` - Run development server
 - `npm build` - Build for production
 - `npm test` - Run tests
 - `npm eject` - Eject from Create React App
+- `npm audit` - Check for security vulnerabilities
 
 ## API Configuration
 

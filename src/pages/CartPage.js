@@ -11,7 +11,6 @@ import {
   TextField,
   Divider,
   Alert,
-  Paper,
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -23,6 +22,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { useSnackbar } from "notistack";
+import EmptyState from "../components/EmptyState";
 
 /**
  * Cart page component
@@ -97,63 +97,18 @@ const CartPage = () => {
           Shopping Cart
         </Typography>
         
-        <Paper
-          elevation={0}
-          sx={{
-            mt: 8,
-            py: 8,
-            px: 4,
-            textAlign: 'center',
-            bgcolor: 'grey.50',
-            borderRadius: 3,
-            border: '2px dashed',
-            borderColor: 'grey.300',
-          }}
-        >
-          <Box
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 120,
-              height: 120,
-              borderRadius: '50%',
-              bgcolor: 'info.light',
-              mb: 3,
-            }}
-          >
-            <EmptyCartIcon sx={{ fontSize: 60, color: 'info.main' }} />
-          </Box>
-          
-          <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-            Your Cart is Empty
-          </Typography>
-          
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 500, mx: 'auto' }}>
-            Looks like you haven't added anything to your cart yet.
-            Browse our products and add items you like!
-          </Typography>
-          
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<StorefrontIcon />}
-            onClick={() => navigate("/products")}
-            sx={{
-              px: 4,
-              py: 1.5,
-              borderRadius: 2,
-              textTransform: 'none',
-              fontSize: '1rem',
-            }}
-          >
-            Browse Products
-          </Button>
-        </Paper>
+        <EmptyState
+          icon={EmptyCartIcon}
+          iconColor="info.main"
+          iconBgColor="info.light"
+          title="Your Cart is Empty"
+          description="Looks like you haven't added anything to your cart yet. Browse our products and add items you like!"
+          actionLabel="Browse Products"
+          onAction={() => navigate("/products")}
+        />
       </Container>
     );
   }
-
 
   return (
     <Container sx={{ py: 4 }}>

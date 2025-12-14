@@ -1,4 +1,6 @@
 import apiClient from './api';
+import { validateEmail, validatePassword } from '../utils/security';
+import { getAccessToken, clearTokens, hasTokens } from '../utils/secureStorage';
 
 /**
  * @typedef {Object} LoginCredentials
@@ -27,17 +29,25 @@ const authService = {
    * @returns {Promise<AuthResponse>} Auth response with tokens
    */
   async login(credentials) {
+    if (!credentials.username || !credentials.password) {
+      throw new Error('Username and password are required');
+    }
+    
     const formData = new FormData();
-    formData.append('username', credentials.username);
+    formData.append('username', credentials.username.trim());
     formData.append('password', credentials.password);
 
-    const response = await apiClient.post('/auth/login', formData, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    });
-    
-    return response.data;
+    try {
+      const response = await apiClient.post('/auth/login', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+      
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   },
 
   /**
@@ -46,7 +56,20 @@ const authService = {
    * @returns {Promise<AuthResponse>} Auth response with tokens
    */
   async register(userData) {
-    const response = await apiClient.post('/auth/register', userData);
+    if (!validateEmail(userData.email)) {
+      throw new Error('Invalid email address');
+    }
+    
+    const passwordValidation = validatePassword(userData.password);
+    if (!passwordValidation.valid) {
+      throw new Error(passwordValidation.errors.join('. '));
+    }
+
+    const response = await apiClient.post('/auth/register', {
+      ...userData,
+      email: userData.email.trim().toLowerCase(),
+    });
+    
     return response.data;
   },
 
@@ -66,8 +89,7 @@ const authService = {
    * Logout user (client-side only)
    */
   logout() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    clearTokens();
   },
 
   /**
@@ -75,7 +97,7 @@ const authService = {
    * @returns {boolean} True if user has access token
    */
   isAuthenticated() {
-    return !!localStorage.getItem('access_token');
+    return hasTokens();
   },
 
   /**
@@ -83,7 +105,7 @@ const authService = {
    * @returns {string|null} Access token or null
    */
   getToken() {
-    return localStorage.getItem('access_token');
+    return getAccessToken();
   },
 };
 

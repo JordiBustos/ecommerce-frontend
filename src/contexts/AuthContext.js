@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import authService from '../services/authService';
 import userService from '../services/userService';
+import { storeTokens, clearTokens, hasTokens, storeUserData, clearUserData } from '../utils/secureStorage';
 
 /**
  * @typedef {Object} AuthContextType
@@ -40,13 +41,16 @@ export const AuthProvider = ({ children }) => {
   // Load user on mount if authenticated
   useEffect(() => {
     const loadUser = async () => {
-      if (authService.isAuthenticated()) {
+      if (hasTokens()) {
         try {
           const userData = await userService.getCurrentUser();
           setUser(userData);
+          storeUserData(userData);
         } catch (error) {
           console.error('Failed to load user:', error);
           authService.logout();
+          clearTokens();
+          clearUserData();
         }
       }
       setLoading(false);
@@ -64,11 +68,12 @@ export const AuthProvider = ({ children }) => {
    */
   const login = async (credentials) => {
     const data = await authService.login(credentials);
-    localStorage.setItem('access_token', data.access_token);
-    localStorage.setItem('refresh_token', data.refresh_token);
+    
+    storeTokens(data.access_token, data.refresh_token);
     
     const userData = await userService.getCurrentUser();
     setUser(userData);
+    storeUserData(userData);
   };
 
   /**
@@ -80,12 +85,7 @@ export const AuthProvider = ({ children }) => {
    * @returns {Promise<void>}
    */
   const register = async (userData) => {
-    const data = await authService.register(userData);
-    localStorage.setItem('access_token', data.access_token);
-    localStorage.setItem('refresh_token', data.refresh_token);
-    
-    const newUserData = await userService.getCurrentUser();
-    setUser(newUserData);
+    await authService.register(userData);
   };
 
   /**
@@ -93,6 +93,8 @@ export const AuthProvider = ({ children }) => {
    */
   const logout = () => {
     authService.logout();
+    clearTokens();
+    clearUserData();
     setUser(null);
   };
 

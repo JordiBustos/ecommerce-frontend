@@ -33,6 +33,7 @@ const cartService = {
    * @returns {Promise<CartItem>} Added cart item
    */
   async addToCart(item) {
+    console.log(item);
     const response = await apiClient.post('/cart/items', item);
     return response.data;
   },

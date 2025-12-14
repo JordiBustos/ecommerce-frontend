@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
-import { SnackbarProvider } from "notistack";
+import { SnackbarProvider, useSnackbar } from "notistack";
 import { StoreProvider } from "./contexts/StoreContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import { FavoritesProvider } from "./contexts/FavoritesContext";
+import { setNotificationHandler } from "./services/api";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -24,6 +25,98 @@ import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import ShippingPolicyPage from "./pages/ShippingPolicyPage";
 
 /**
+ * Inner app component to access snackbar
+ */
+const AppContent = () => {
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    // Set global notification handler for API errors
+    setNotificationHandler(enqueueSnackbar);
+  }, [enqueueSnackbar]);
+
+  return (
+    <StoreProvider>
+      <CssBaseline />
+      <Router>
+        <AuthProvider>
+          <CartProvider>
+            <FavoritesProvider>
+              <Navbar />
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route
+                  path="/privacy-policy"
+                  element={<PrivacyPolicyPage />}
+                />
+                <Route
+                  path="/shipping-policy"
+                  element={<ShippingPolicyPage />}
+                />
+
+                {/* Protected routes */}
+                <Route
+                  path="/products"
+                  element={
+                    <ProtectedRoute>
+                      <ProductsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/cart"
+                  element={
+                    <ProtectedRoute>
+                      <CartPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/favorites"
+                  element={
+                    <ProtectedRoute>
+                      <FavoritesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/orders"
+                  element={
+                    <ProtectedRoute>
+                      <OrdersPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/orders/:orderId"
+                  element={
+                    <ProtectedRoute>
+                      <OrderDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+              <Footer />
+            </FavoritesProvider>
+          </CartProvider>
+        </AuthProvider>
+      </Router>
+    </StoreProvider>
+  );
+};
+
+/**
  * Main App component
  */
 function App() {
@@ -33,83 +126,7 @@ function App() {
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       autoHideDuration={3000}
     >
-      <StoreProvider>
-        <CssBaseline />
-        <Router>
-          <AuthProvider>
-            <CartProvider>
-              <FavoritesProvider>
-                <Navbar />
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route
-                    path="/privacy-policy"
-                    element={<PrivacyPolicyPage />}
-                  />
-                  <Route
-                    path="/shipping-policy"
-                    element={<ShippingPolicyPage />}
-                  />
-
-                  {/* Protected routes */}
-                  <Route
-                    path="/products"
-                    element={
-                      <ProtectedRoute>
-                        <ProductsPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/cart"
-                    element={
-                      <ProtectedRoute>
-                        <CartPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile"
-                    element={
-                      <ProtectedRoute>
-                        <ProfilePage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/favorites"
-                    element={
-                      <ProtectedRoute>
-                        <FavoritesPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/orders"
-                    element={
-                      <ProtectedRoute>
-                        <OrdersPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/orders/:orderId"
-                    element={
-                      <ProtectedRoute>
-                        <OrderDetailPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                </Routes>
-                <Footer />
-              </FavoritesProvider>
-            </CartProvider>
-          </AuthProvider>
-        </Router>
-      </StoreProvider>
+      <AppContent />
     </SnackbarProvider>
   );
 }

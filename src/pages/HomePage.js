@@ -203,9 +203,10 @@ const HomePage = () => {
             <Button
               variant="contained"
               size="large"
-              onClick={() =>
-                navigate(isAuthenticated ? "/products" : "/register")
-              }
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                navigate(isAuthenticated ? "/products" : "/register");
+              }}
             >
               {isAuthenticated ? "Browse Products" : "Sign Up Now"}
             </Button>
