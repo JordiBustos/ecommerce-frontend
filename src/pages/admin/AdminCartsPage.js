@@ -6,9 +6,9 @@ import {
   Chip,
 } from '@mui/material';
 import { ShoppingCartOutlined } from '@mui/icons-material';
-import useDataFetching from '../hooks/useDataFetching';
-import DataTable from '../components/DataTable';
-import apiClient from '../services/api';
+import useDataFetching from '../../hooks/useDataFetching';
+import DataTable from '../../components/DataTable';
+import apiClient from '../../services/api';
 
 /**
  * Admin page to view all user carts
