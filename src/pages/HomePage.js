@@ -100,7 +100,7 @@ const HomePage = () => {
           <Typography variant="h5" paragraph>
             Discover amazing products at great prices
           </Typography>
-          <Box sx={{ mt: 4 }}>
+          <Box sx={{ mt: 4, mb: 4 }}>
             {isAuthenticated ? (
               <Button
                 variant="contained"

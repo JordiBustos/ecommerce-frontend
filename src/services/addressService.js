@@ -1,4 +1,4 @@
-import apiClient from './api';
+import apiClient from "./api";
 
 /**
  * Address service
@@ -11,7 +11,7 @@ const addressService = {
    */
   getAddresses: async () => {
     try {
-      const response = await apiClient.get('/addresses/');
+      const response = await apiClient.get("/addresses/");
       return response.data;
     } catch (error) {
       throw error;
@@ -39,7 +39,7 @@ const addressService = {
    */
   createAddress: async (addressData) => {
     try {
-      const response = await apiClient.post('/addresses/', addressData);
+      const response = await apiClient.post("/addresses/", addressData);
       return response.data;
     } catch (error) {
       throw error;
@@ -54,7 +54,10 @@ const addressService = {
    */
   updateAddress: async (addressId, addressData) => {
     try {
-      const response = await apiClient.put(`/addresses/${addressId}`, addressData);
+      const response = await apiClient.put(
+        `/addresses/${addressId}`,
+        addressData
+      );
       return response.data;
     } catch (error) {
       throw error;

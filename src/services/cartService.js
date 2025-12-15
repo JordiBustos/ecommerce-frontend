@@ -1,4 +1,4 @@
-import apiClient from './api';
+import apiClient from "./api";
 
 /**
  * @typedef {Object} CartItem
@@ -21,7 +21,7 @@ const cartService = {
    * @returns {Promise<Cart>} Cart data
    */
   async getCart() {
-    const response = await apiClient.get('/cart/');
+    const response = await apiClient.get("/cart/");
     return response.data;
   },
 
@@ -33,8 +33,7 @@ const cartService = {
    * @returns {Promise<CartItem>} Added cart item
    */
   async addToCart(item) {
-    console.log(item);
-    const response = await apiClient.post('/cart/items', item);
+    const response = await apiClient.post("/cart/items", item);
     return response.data;
   },
 
@@ -63,7 +62,7 @@ const cartService = {
    * @returns {Promise<void>}
    */
   async clearCart() {
-    await apiClient.delete('/cart/');
+    await apiClient.delete("/cart/");
   },
 };
 

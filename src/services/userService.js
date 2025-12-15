@@ -47,6 +47,45 @@ const userService = {
     const response = await apiClient.get(`/users/${userId}`);
     return response.data;
   },
+
+  /**
+   * Get user addresses
+   * @returns {Promise<Array>} List of user addresses
+   */
+  async getAddresses() {
+    const response = await apiClient.get('/addresses/');
+    return response.data;
+  },
+
+  /**
+   * Add new address
+   * @param {Object} addressData - Address data
+   * @returns {Promise<Object>} Created address
+   */
+  async addAddress(addressData) {
+    const response = await apiClient.post('/addresses/', addressData);
+    return response.data;
+  },
+
+  /**
+   * Update address
+   * @param {number} addressId - Address ID
+   * @param {Object} addressData - Address data to update
+   * @returns {Promise<Object>} Updated address
+   */
+  async updateAddress(addressId, addressData) {
+    const response = await apiClient.put(`/addresses/${addressId}`, addressData);
+    return response.data;
+  },
+
+  /**
+   * Delete address
+   * @param {number} addressId - Address ID
+   * @returns {Promise<void>}
+   */
+  async deleteAddress(addressId) {
+    await apiClient.delete(`/addresses/${addressId}`);
+  },
 };
 
 export default userService;

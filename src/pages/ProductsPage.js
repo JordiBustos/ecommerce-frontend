@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Grid,
@@ -215,7 +215,7 @@ const ProductsPage = () => {
         variant: "success",
       });
     } catch (err) {
-      enqueueSnackbar("Failed to add to cart", { variant: "error" });
+      console.error(err);
     }
   };
 

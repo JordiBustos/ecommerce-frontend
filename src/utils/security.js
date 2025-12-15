@@ -231,6 +231,18 @@ export const validatePostalCode = (postalCode) => {
 export const sanitizeObject = (obj) => {
   if (!obj || typeof obj !== 'object') return obj;
   
+  // Preserve arrays
+  if (Array.isArray(obj)) {
+    return obj.map(item => {
+      if (typeof item === 'string') {
+        return sanitizeInput(item);
+      } else if (typeof item === 'object' && item !== null) {
+        return sanitizeObject(item);
+      }
+      return item;
+    });
+  }
+  
   const sanitized = {};
   
   for (const [key, value] of Object.entries(obj)) {

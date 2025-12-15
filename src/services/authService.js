@@ -1,6 +1,6 @@
-import apiClient from './api';
-import { validateEmail, validatePassword } from '../utils/security';
-import { getAccessToken, clearTokens, hasTokens } from '../utils/secureStorage';
+import apiClient from "./api";
+import { validateEmail, validatePassword } from "../utils/security";
+import { getAccessToken, clearTokens, hasTokens } from "../utils/secureStorage";
 
 /**
  * @typedef {Object} LoginCredentials
@@ -30,20 +30,20 @@ const authService = {
    */
   async login(credentials) {
     if (!credentials.username || !credentials.password) {
-      throw new Error('Username and password are required');
+      throw new Error("Username and password are required");
     }
-    
+
     const formData = new FormData();
-    formData.append('username', credentials.username.trim());
-    formData.append('password', credentials.password);
+    formData.append("username", credentials.username.trim());
+    formData.append("password", credentials.password);
 
     try {
-      const response = await apiClient.post('/auth/login', formData, {
+      const response = await apiClient.post("/auth/login", formData, {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       });
-      
+
       return response.data;
     } catch (error) {
       throw error;
@@ -57,19 +57,19 @@ const authService = {
    */
   async register(userData) {
     if (!validateEmail(userData.email)) {
-      throw new Error('Invalid email address');
-    }
-    
-    const passwordValidation = validatePassword(userData.password);
-    if (!passwordValidation.valid) {
-      throw new Error(passwordValidation.errors.join('. '));
+      throw new Error("Invalid email address");
     }
 
-    const response = await apiClient.post('/auth/register', {
+    const passwordValidation = validatePassword(userData.password);
+    if (!passwordValidation.valid) {
+      throw new Error(passwordValidation.errors.join(". "));
+    }
+
+    const response = await apiClient.post("/auth/register", {
       ...userData,
       email: userData.email.trim().toLowerCase(),
     });
-    
+
     return response.data;
   },
 
@@ -79,7 +79,7 @@ const authService = {
    * @returns {Promise<AuthResponse>} New tokens
    */
   async refreshToken(refreshToken) {
-    const response = await apiClient.post('/auth/refresh', {
+    const response = await apiClient.post("/auth/refresh", {
       refresh_token: refreshToken,
     });
     return response.data;

@@ -56,7 +56,18 @@ apiClient.interceptors.request.use(
       !(config.data instanceof File) &&
       !(config.data instanceof Blob)
     ) {
-      config.data = sanitizeObject(config.data);
+      const sanitized = sanitizeObject(config.data);
+
+      if (
+        config.method === "post" ||
+        config.method === "put" ||
+        config.method === "patch"
+      ) {
+        config.data = JSON.stringify(sanitized);
+        config.headers["Content-Type"] = "application/json";
+      } else {
+        config.data = sanitized;
+      }
     }
 
     // Add request timestamp for replay attack prevention
@@ -88,6 +99,13 @@ apiClient.interceptors.response.use(
     }
 
     const { status } = error.response;
+
+    if (status === 400) {
+      const message = error.response.data.detail || "Bad request.";
+      if (notificationHandler) {
+        notificationHandler(message, { variant: "error" });
+      }
+    }
 
     // Handle 401 Unauthorized - Token refresh
     if (status === 401 && !originalRequest._retry) {

@@ -1,6 +1,12 @@
-import React from 'react';
-import { Container, Typography, Box, Paper, Divider, Chip } from '@mui/material';
-import { LocalShipping as ShippingIcon } from '@mui/icons-material';
+import {
+  Container,
+  Typography,
+  Box,
+  Paper,
+  Divider,
+  Chip,
+} from "@mui/material";
+import { LocalShipping as ShippingIcon } from "@mui/icons-material";
 
 /**
  * Shipping Policy page
@@ -8,26 +14,32 @@ import { LocalShipping as ShippingIcon } from '@mui/icons-material';
 const ShippingPolicyPage = () => {
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <ShippingIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+        <ShippingIcon sx={{ fontSize: 40, color: "primary.main" }} />
         <Typography variant="h3" sx={{ fontWeight: 700 }}>
           Política de Envío
         </Typography>
       </Box>
-      <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 4 }}>
-        Última actualización: {new Date().toLocaleDateString('es-ES')}
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        gutterBottom
+        sx={{ mb: 4 }}
+      >
+        Última actualización: {new Date().toLocaleDateString("es-ES")}
       </Typography>
 
-      <Paper elevation={0} sx={{ p: 4, bgcolor: 'grey.50' }}>
+      <Paper elevation={0} sx={{ p: 4, bgcolor: "grey.50" }}>
         <Box sx={{ mb: 4 }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
             1. Áreas de Envío
           </Typography>
           <Typography variant="body1" paragraph>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Realizamos envíos a toda la península ibérica, 
-            islas Baleares y Canarias. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Realizamos
+            envíos a toda la península ibérica, islas Baleares y Canarias. Sed
+            do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 2 }}>
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mt: 2 }}>
             <Chip label="Península" color="primary" />
             <Chip label="Islas Baleares" color="primary" />
             <Chip label="Islas Canarias" color="primary" />
@@ -42,9 +54,11 @@ const ShippingPolicyPage = () => {
             2. Tiempo de Procesamiento
           </Typography>
           <Typography variant="body1" paragraph>
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-            Los pedidos se procesan en un plazo de 24-48 horas laborables. Duis aute irure dolor in reprehenderit in 
-            voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+            nisi ut aliquip ex ea commodo consequat. Los pedidos se procesan en
+            un plazo de 24-48 horas laborables. Duis aute irure dolor in
+            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+            pariatur.
           </Typography>
         </Box>
 
@@ -55,11 +69,12 @@ const ShippingPolicyPage = () => {
             3. Métodos de Envío y Tarifas
           </Typography>
           <Typography variant="body1" paragraph sx={{ mb: 2 }}>
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium. 
-            Ofrecemos diferentes opciones de envío:
+            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+            accusantium doloremque laudantium. Ofrecemos diferentes opciones de
+            envío:
           </Typography>
-          
-          <Box sx={{ bgcolor: 'white', p: 2, borderRadius: 1, mb: 2 }}>
+
+          <Box sx={{ bgcolor: "white", p: 2, borderRadius: 1, mb: 2 }}>
             <Typography variant="h6" gutterBottom>
               Envío Estándar (3-5 días laborables)
             </Typography>
@@ -74,7 +89,7 @@ const ShippingPolicyPage = () => {
             </Typography>
           </Box>
 
-          <Box sx={{ bgcolor: 'white', p: 2, borderRadius: 1, mb: 2 }}>
+          <Box sx={{ bgcolor: "white", p: 2, borderRadius: 1, mb: 2 }}>
             <Typography variant="h6" gutterBottom>
               Envío Express (24-48 horas)
             </Typography>
@@ -94,9 +109,10 @@ const ShippingPolicyPage = () => {
             4. Seguimiento del Pedido
           </Typography>
           <Typography variant="body1" paragraph>
-            At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum. 
-            Una vez que tu pedido sea enviado, recibirás un correo electrónico con el número de seguimiento y 
-            un enlace para rastrear tu paquete en tiempo real.
+            At vero eos et accusamus et iusto odio dignissimos ducimus qui
+            blanditiis praesentium voluptatum. Una vez que tu pedido sea
+            enviado, recibirás un correo electrónico con el número de
+            seguimiento y un enlace para rastrear tu paquete en tiempo real.
           </Typography>
         </Box>
 
@@ -107,9 +123,10 @@ const ShippingPolicyPage = () => {
             5. Retrasos en la Entrega
           </Typography>
           <Typography variant="body1" paragraph>
-            Et harum quidem rerum facilis est et expedita distinctio. En caso de retrasos debido a circunstancias 
-            excepcionales (condiciones meteorológicas adversas, huelgas, etc.), te informaremos inmediatamente por 
-            correo electrónico o teléfono.
+            Et harum quidem rerum facilis est et expedita distinctio. En caso de
+            retrasos debido a circunstancias excepcionales (condiciones
+            meteorológicas adversas, huelgas, etc.), te informaremos
+            inmediatamente por correo electrónico o teléfono.
           </Typography>
         </Box>
 
@@ -120,14 +137,17 @@ const ShippingPolicyPage = () => {
             6. Recepción del Pedido
           </Typography>
           <Typography variant="body1" paragraph>
-            Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet. 
-            Es importante que alguien esté presente en la dirección de entrega para recibir el paquete:
+            Temporibus autem quibusdam et aut officiis debitis aut rerum
+            necessitatibus saepe eveniet. Es importante que alguien esté
+            presente en la dirección de entrega para recibir el paquete:
           </Typography>
           <Typography variant="body1" component="ul" sx={{ pl: 3 }}>
             <li>Verifica el estado del paquete antes de firmar</li>
             <li>Reporta cualquier daño visible inmediatamente</li>
             <li>Si no estás disponible, el transportista dejará un aviso</li>
-            <li>Tienes 7 días para recoger el paquete en la oficina de correos</li>
+            <li>
+              Tienes 7 días para recoger el paquete en la oficina de correos
+            </li>
           </Typography>
         </Box>
 

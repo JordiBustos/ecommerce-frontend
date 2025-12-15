@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Box,
@@ -20,13 +20,23 @@ import {
   FormControlLabel,
   Switch,
   Divider,
-} from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
-import { useSnackbar } from 'notistack';
-import addressService from '../services/addressService';
-import newsletterService from '../services/newsletterService';
-import { validateEmail, validatePhone, validateDNI, validatePostalCode, parseAPIError } from '../utils/security';
+} from "@mui/material";
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
+import { useAuth } from "../contexts/AuthContext";
+import { useSnackbar } from "notistack";
+import addressService from "../services/addressService";
+import newsletterService from "../services/newsletterService";
+import {
+  validateEmail,
+  validatePhone,
+  validateDNI,
+  validatePostalCode,
+  parseAPIError,
+} from "../utils/security";
 
 /**
  * Profile page component
@@ -35,12 +45,12 @@ const ProfilePage = () => {
   const { user, updateUser } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const [formData, setFormData] = useState({
-    email: '',
-    full_name: '',
-    dni: '',
-    birth_date: '',
-    gender: '',
-    phone_number: '',
+    email: "",
+    full_name: "",
+    dni: "",
+    birth_date: "",
+    gender: "",
+    phone_number: "",
   });
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -48,20 +58,20 @@ const ProfilePage = () => {
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [addressToDelete, setAddressToDelete] = useState(null);
   const [editingAddress, setEditingAddress] = useState(null);
   const [addressFormData, setAddressFormData] = useState({
-    full_name: '',
-    country: '',
-    postal_code: '',
-    province: '',
-    city: '',
-    address_line1: '',
-    address_line2: '',
-    phone_number: '',
+    full_name: "",
+    country: "",
+    postal_code: "",
+    province: "",
+    city: "",
+    address_line1: "",
+    address_line2: "",
+    phone_number: "",
     is_default: false,
   });
 
@@ -74,7 +84,7 @@ const ProfilePage = () => {
       const data = await addressService.getAddresses();
       setAddresses(data);
     } catch (error) {
-      enqueueSnackbar('Failed to load addresses', { variant: 'error' });
+      enqueueSnackbar("Failed to load addresses", { variant: "error" });
     } finally {
       setAddressLoading(false);
     }
@@ -96,12 +106,12 @@ const ProfilePage = () => {
   useEffect(() => {
     if (user) {
       setFormData({
-        email: user.email || '',
-        full_name: user.full_name || '',
-        dni: user.dni || '',
-        birth_date: user.birth_date || '',
-        gender: user.gender || '',
-        phone_number: user.phone_number || '',
+        email: user.email || "",
+        full_name: user.full_name || "",
+        dni: user.dni || "",
+        birth_date: user.birth_date || "",
+        gender: user.gender || "",
+        phone_number: user.phone_number || "",
       });
     }
     loadAddresses();
@@ -113,19 +123,23 @@ const ProfilePage = () => {
    */
   const handleNewsletterToggle = async (event) => {
     const subscribe = event.target.checked;
-    
+
     try {
       setNewsletterLoading(true);
       if (subscribe) {
         await newsletterService.subscribe(user.email);
-        enqueueSnackbar('Subscribed to newsletter successfully', { variant: 'success' });
+        enqueueSnackbar("Subscribed to newsletter successfully", {
+          variant: "success",
+        });
       } else {
         await newsletterService.unsubscribe(user.email);
-        enqueueSnackbar('Unsubscribed from newsletter', { variant: 'info' });
+        enqueueSnackbar("Unsubscribed from newsletter", { variant: "info" });
       }
       setNewsletterSubscribed(subscribe);
     } catch (error) {
-      enqueueSnackbar('Failed to update newsletter subscription', { variant: 'error' });
+      enqueueSnackbar("Failed to update newsletter subscription", {
+        variant: "error",
+      });
     } finally {
       setNewsletterLoading(false);
     }
@@ -141,7 +155,7 @@ const ProfilePage = () => {
       [e.target.name]: e.target.value,
     });
     setSuccess(false);
-    setError('');
+    setError("");
   };
 
   /**
@@ -152,28 +166,28 @@ const ProfilePage = () => {
     e.preventDefault();
     setLoading(true);
     setSuccess(false);
-    setError('');
+    setError("");
 
     // Validate email
     if (formData.email && !validateEmail(formData.email)) {
-      setError('Invalid email address');
-      enqueueSnackbar('Invalid email address', { variant: 'error' });
+      setError("Invalid email address");
+      enqueueSnackbar("Invalid email address", { variant: "error" });
       setLoading(false);
       return;
     }
 
     // Validate phone number
     if (formData.phone_number && !validatePhone(formData.phone_number)) {
-      setError('Invalid phone number');
-      enqueueSnackbar('Invalid phone number', { variant: 'error' });
+      setError("Invalid phone number");
+      enqueueSnackbar("Invalid phone number", { variant: "error" });
       setLoading(false);
       return;
     }
 
     // Validate DNI
     if (formData.dni && !validateDNI(formData.dni)) {
-      setError('Invalid DNI format');
-      enqueueSnackbar('Invalid DNI format', { variant: 'error' });
+      setError("Invalid DNI format");
+      enqueueSnackbar("Invalid DNI format", { variant: "error" });
       setLoading(false);
       return;
     }
@@ -181,11 +195,11 @@ const ProfilePage = () => {
     try {
       await updateUser(formData);
       setSuccess(true);
-      enqueueSnackbar('Profile updated successfully', { variant: 'success' });
+      enqueueSnackbar("Profile updated successfully", { variant: "success" });
     } catch (err) {
-      const errorMsg = parseAPIError(err, 'Failed to update profile');
+      const errorMsg = parseAPIError(err, "Failed to update profile");
       setError(errorMsg);
-      enqueueSnackbar(errorMsg, { variant: 'error' });
+      enqueueSnackbar(errorMsg, { variant: "error" });
     } finally {
       setLoading(false);
     }
@@ -199,27 +213,27 @@ const ProfilePage = () => {
     if (address) {
       setEditingAddress(address);
       setAddressFormData({
-        full_name: address.full_name || '',
-        country: address.country || '',
-        postal_code: address.postal_code || '',
-        province: address.province || '',
-        city: address.city || '',
-        address_line1: address.address_line1 || '',
-        address_line2: address.address_line2 || '',
-        phone_number: address.phone_number || '',
+        full_name: address.full_name || "",
+        country: address.country || "",
+        postal_code: address.postal_code || "",
+        province: address.province || "",
+        city: address.city || "",
+        address_line1: address.address_line1 || "",
+        address_line2: address.address_line2 || "",
+        phone_number: address.phone_number || "",
         is_default: address.is_default || false,
       });
     } else {
       setEditingAddress(null);
       setAddressFormData({
-        full_name: user?.full_name || '',
-        country: '',
-        postal_code: '',
-        province: '',
-        city: '',
-        address_line1: '',
-        address_line2: '',
-        phone_number: user?.phone_number || '',
+        full_name: user?.full_name || "",
+        country: "",
+        postal_code: "",
+        province: "",
+        city: "",
+        address_line1: "",
+        address_line2: "",
+        phone_number: user?.phone_number || "",
         is_default: false,
       });
     }
@@ -241,7 +255,7 @@ const ProfilePage = () => {
     const { name, value, checked, type } = e.target;
     setAddressFormData({
       ...addressFormData,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
@@ -251,55 +265,58 @@ const ProfilePage = () => {
   const handleAddressSubmit = async () => {
     // Validate required fields
     if (!addressFormData.full_name?.trim()) {
-      enqueueSnackbar('Full name is required', { variant: 'error' });
+      enqueueSnackbar("Full name is required", { variant: "error" });
       return;
     }
 
     if (!addressFormData.country?.trim()) {
-      enqueueSnackbar('Country is required', { variant: 'error' });
+      enqueueSnackbar("Country is required", { variant: "error" });
       return;
     }
 
     if (!addressFormData.postal_code?.trim()) {
-      enqueueSnackbar('Postal code is required', { variant: 'error' });
+      enqueueSnackbar("Postal code is required", { variant: "error" });
       return;
     }
 
     // Validate postal code format
     if (!validatePostalCode(addressFormData.postal_code)) {
-      enqueueSnackbar('Invalid postal code format', { variant: 'error' });
+      enqueueSnackbar("Invalid postal code format", { variant: "error" });
       return;
     }
 
     if (!addressFormData.city?.trim()) {
-      enqueueSnackbar('City is required', { variant: 'error' });
+      enqueueSnackbar("City is required", { variant: "error" });
       return;
     }
 
     if (!addressFormData.address_line1?.trim()) {
-      enqueueSnackbar('Address is required', { variant: 'error' });
+      enqueueSnackbar("Address is required", { variant: "error" });
       return;
     }
 
     // Validate phone number
-    if (addressFormData.phone_number && !validatePhone(addressFormData.phone_number)) {
-      enqueueSnackbar('Invalid phone number format', { variant: 'error' });
+    if (
+      addressFormData.phone_number &&
+      !validatePhone(addressFormData.phone_number)
+    ) {
+      enqueueSnackbar("Invalid phone number format", { variant: "error" });
       return;
     }
 
     try {
       if (editingAddress) {
         await addressService.updateAddress(editingAddress.id, addressFormData);
-        enqueueSnackbar('Address updated successfully', { variant: 'success' });
+        enqueueSnackbar("Address updated successfully", { variant: "success" });
       } else {
         await addressService.createAddress(addressFormData);
-        enqueueSnackbar('Address added successfully', { variant: 'success' });
+        enqueueSnackbar("Address added successfully", { variant: "success" });
       }
       await loadAddresses();
       handleAddressDialogClose();
     } catch (error) {
-      const errorMsg = parseAPIError(error, 'Failed to save address');
-      enqueueSnackbar(errorMsg, { variant: 'error' });
+      const errorMsg = parseAPIError(error, "Failed to save address");
+      enqueueSnackbar(errorMsg, { variant: "error" });
     }
   };
 
@@ -316,13 +333,13 @@ const ProfilePage = () => {
    */
   const confirmDeleteAddress = async () => {
     if (!addressToDelete) return;
-    
+
     try {
       await addressService.deleteAddress(addressToDelete.id);
-      enqueueSnackbar('Address deleted successfully', { variant: 'success' });
+      enqueueSnackbar("Address deleted successfully", { variant: "success" });
       await loadAddresses();
     } catch (error) {
-      enqueueSnackbar('Failed to delete address', { variant: 'error' });
+      enqueueSnackbar("Failed to delete address", { variant: "error" });
     } finally {
       setDeleteConfirmOpen(false);
       setAddressToDelete(null);
@@ -439,7 +456,7 @@ const ProfilePage = () => {
                 size="large"
                 disabled={loading}
               >
-                {loading ? <CircularProgress size={24} /> : 'Update Profile'}
+                {loading ? <CircularProgress size={24} /> : "Update Profile"}
               </Button>
             </Grid>
           </Grid>
@@ -448,10 +465,15 @@ const ProfilePage = () => {
 
       {/* Addresses Section */}
       <Paper sx={{ p: 4, mt: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h5">
-            Addresses
-          </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+          }}
+        >
+          <Typography variant="h5">Addresses</Typography>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -462,7 +484,7 @@ const ProfilePage = () => {
         </Box>
 
         {addressLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
             <CircularProgress />
           </Box>
         ) : addresses.length === 0 ? (
@@ -475,10 +497,24 @@ const ProfilePage = () => {
               <Grid item xs={12} md={6} key={address.id}>
                 <Card variant="outlined">
                   <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                      }}
+                    >
                       <Box sx={{ flex: 1 }}>
                         {address.is_default && (
-                          <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600, mb: 1, display: 'block' }}>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: "primary.main",
+                              fontWeight: 600,
+                              mb: 1,
+                              display: "block",
+                            }}
+                          >
                             DEFAULT
                           </Typography>
                         )}
@@ -494,12 +530,17 @@ const ProfilePage = () => {
                           </Typography>
                         )}
                         <Typography variant="body2" color="text.secondary">
-                          {address.city}, {address.province} {address.postal_code}
+                          {address.city}, {address.province}{" "}
+                          {address.postal_code}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           {address.country}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 0.5 }}
+                        >
                           📞 {address.phone_number}
                         </Typography>
                       </Box>
@@ -536,35 +577,61 @@ const ProfilePage = () => {
         <Box sx={{ mt: 2 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">User ID</Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>{user?.id}</Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">Username</Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>{user?.username}</Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">Account Status</Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500, color: user?.is_active ? 'success.main' : 'error.main' }}>
-                {user?.is_active ? 'Active' : 'Inactive'}
+              <Typography variant="body2" color="text.secondary">
+                User ID
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                {user?.id}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">Account Type</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Username
+              </Typography>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.is_superuser ? 'Admin' : 'Regular User'}
+                {user?.username}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">Member Since</Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+              <Typography variant="body2" color="text.secondary">
+                Account Status
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: 500,
+                  color: user?.is_active ? "success.main" : "error.main",
+                }}
+              >
+                {user?.is_active ? "Active" : "Inactive"}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">Last Updated</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Account Type
+              </Typography>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.updated_at ? new Date(user.updated_at).toLocaleDateString() : 'N/A'}
+                {user?.is_superuser ? "Admin" : "Regular User"}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="body2" color="text.secondary">
+                Member Since
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                {user?.created_at
+                  ? new Date(user.created_at).toLocaleDateString()
+                  : "N/A"}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="body2" color="text.secondary">
+                Last Updated
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                {user?.updated_at
+                  ? new Date(user.updated_at).toLocaleDateString()
+                  : "N/A"}
               </Typography>
             </Grid>
           </Grid>
@@ -572,9 +639,14 @@ const ProfilePage = () => {
       </Paper>
 
       {/* Address Dialog */}
-      <Dialog open={addressDialogOpen} onClose={handleAddressDialogClose} maxWidth="sm" fullWidth>
+      <Dialog
+        open={addressDialogOpen}
+        onClose={handleAddressDialogClose}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>
-          {editingAddress ? 'Edit Address' : 'Add New Address'}
+          {editingAddress ? "Edit Address" : "Add New Address"}
         </DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
@@ -662,7 +734,7 @@ const ProfilePage = () => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
                   <input
                     type="checkbox"
                     id="is_default"
@@ -672,7 +744,9 @@ const ProfilePage = () => {
                     style={{ marginRight: 8 }}
                   />
                   <label htmlFor="is_default">
-                    <Typography variant="body2">Set as default address</Typography>
+                    <Typography variant="body2">
+                      Set as default address
+                    </Typography>
                   </label>
                 </Box>
               </Grid>
@@ -682,25 +756,25 @@ const ProfilePage = () => {
         <DialogActions>
           <Button onClick={handleAddressDialogClose}>Cancel</Button>
           <Button onClick={handleAddressSubmit} variant="contained">
-            {editingAddress ? 'Update' : 'Add'}
+            {editingAddress ? "Update" : "Add"}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog 
-        open={deleteConfirmOpen} 
+      <Dialog
+        open={deleteConfirmOpen}
         onClose={cancelDeleteAddress}
         maxWidth="xs"
         fullWidth
         PaperProps={{
           sx: {
             borderRadius: 2,
-          }
+          },
         }}
       >
         <DialogTitle sx={{ pb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <DeleteIcon color="error" />
             <Typography variant="h6">Delete Address</Typography>
           </Box>
@@ -710,7 +784,7 @@ const ProfilePage = () => {
             Are you sure you want to delete this address?
           </Typography>
           {addressToDelete && (
-            <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
+            <Paper variant="outlined" sx={{ p: 2, bgcolor: "grey.50" }}>
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
                 {addressToDelete.full_name}
               </Typography>
@@ -723,7 +797,8 @@ const ProfilePage = () => {
                 </Typography>
               )}
               <Typography variant="body2" color="text.secondary">
-                {addressToDelete.city}, {addressToDelete.province} {addressToDelete.postal_code}
+                {addressToDelete.city}, {addressToDelete.province}{" "}
+                {addressToDelete.postal_code}
               </Typography>
             </Paper>
           )}
@@ -732,14 +807,11 @@ const ProfilePage = () => {
           </Alert>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button 
-            onClick={cancelDeleteAddress}
-            variant="outlined"
-          >
+          <Button onClick={cancelDeleteAddress} variant="outlined">
             Cancel
           </Button>
-          <Button 
-            onClick={confirmDeleteAddress} 
+          <Button
+            onClick={confirmDeleteAddress}
             variant="contained"
             color="error"
             startIcon={<DeleteIcon />}
@@ -755,7 +827,7 @@ const ProfilePage = () => {
           Account Settings
         </Typography>
         <Divider sx={{ mb: 3 }} />
-        
+
         <Box>
           <FormControlLabel
             control={
@@ -769,7 +841,8 @@ const ProfilePage = () => {
               <Box>
                 <Typography variant="body1">Newsletter Subscription</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Receive updates about new products, exclusive discounts, and more
+                  Receive updates about new products, exclusive discounts, and
+                  more
                 </Typography>
               </Box>
             }

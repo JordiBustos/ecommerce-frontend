@@ -75,7 +75,9 @@ const RegisterPage = () => {
 
     // Validate DNI if provided
     if (formData.dni && !validateDNI(formData.dni)) {
-      setError("Invalid DNI format. Must be 8 digits followed by a letter (e.g., 12345678A)");
+      setError(
+        "Invalid DNI format. Must be 8 digits followed by a letter (e.g., 12345678A)"
+      );
       return;
     }
 
@@ -107,17 +109,21 @@ const RegisterPage = () => {
         website: "",
         company_name: "",
         email: formData.email,
-        username: formData.username || formData.email.split('@')[0],
+        username: formData.username || formData.email.split("@")[0],
         full_name: formData.full_name || "",
         dni: formData.dni || "",
-        birth_date: formData.birth_date || new Date().toISOString().split('T')[0],
+        birth_date:
+          formData.birth_date || new Date().toISOString().split("T")[0],
         gender: formData.gender || "",
         phone_number: formData.phone_number || "",
         password: formData.password,
       };
 
       await register(userData);
-      enqueueSnackbar("Registration successful! Please log in with your credentials.", { variant: "success" });
+      enqueueSnackbar(
+        "Registration successful! Please log in with your credentials.",
+        { variant: "success" }
+      );
       navigate("/login");
     } catch (err) {
       setError(parseAPIError(err, "Failed to register. Please try again."));

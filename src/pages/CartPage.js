@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Container,
   Box,
@@ -10,14 +9,12 @@ import {
   IconButton,
   TextField,
   Divider,
-  Alert,
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
   Add,
   Remove,
   ShoppingCartOutlined as EmptyCartIcon,
-  Storefront as StorefrontIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
@@ -96,7 +93,7 @@ const CartPage = () => {
         <Typography variant="h3" gutterBottom>
           Shopping Cart
         </Typography>
-        
+
         <EmptyState
           icon={EmptyCartIcon}
           iconColor="info.main"
@@ -168,6 +165,14 @@ const CartPage = () => {
                       />
                       <IconButton
                         size="small"
+                        disabled={
+                          (item.product &&
+                            !item.product.is_always_in_stock &&
+                            item.quantity >= item.product.stock) ||
+                          (item.product &&
+                            item.product.max_per_buy &&
+                            item.quantity >= item.product.max_per_buy)
+                        }
                         onClick={() =>
                           handleQuantityChange(
                             item.id,

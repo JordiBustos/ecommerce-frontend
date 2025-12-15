@@ -31,6 +31,15 @@ const storeService = {
     const response = await apiClient.put('/store/', settings);
     return response.data;
   },
+
+  /**
+   * Get physical stores for pickup
+   * @returns {Promise<Array>} List of physical stores
+   */
+  async getPhysicalStores() {
+    const response = await apiClient.get('/store/physical-stores');
+    return response.data;
+  },
 };
 
 export default storeService;
