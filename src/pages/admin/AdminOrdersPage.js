@@ -2,9 +2,9 @@ import React from "react";
 import { Container, Typography, Box, Chip } from "@mui/material";
 import { ReceiptOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import useDataFetching from "../hooks/useDataFetching";
-import DataTable from "../components/DataTable";
-import apiClient from "../services/api";
+import useDataFetching from "../../hooks/useDataFetching";
+import DataTable from "../../components/DataTable";
+import apiClient from "../../services/api";
 
 /**
  * Get status color based on order status
