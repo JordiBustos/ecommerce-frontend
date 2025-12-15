@@ -1,9 +1,10 @@
+import React from "react";
 import { Container, Typography, Box, Chip } from "@mui/material";
-import { Receipt as ReceiptIcon } from "@mui/icons-material";
+import { ReceiptOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import useDataFetching from "../hooks/useDataFetching";
 import DataTable from "../components/DataTable";
-import orderService from "../services/orderService";
+import apiClient from "../services/api";
 
 /**
  * Get status color based on order status
@@ -20,16 +21,19 @@ const getStatusColor = (status) => {
 };
 
 /**
- * Orders page component - Lists all user orders
+ * Admin page to view all orders
  */
-const OrdersPage = () => {
+const AdminOrdersPage = () => {
   const navigate = useNavigate();
 
   const {
     data: orders,
     loading,
     error,
-  } = useDataFetching(() => orderService.getOrders(), []);
+  } = useDataFetching(async () => {
+    const response = await apiClient.get("/orders/all/admin");
+    return response.data;
+  }, []);
 
   const columns = [
     {
@@ -37,6 +41,12 @@ const OrdersPage = () => {
       header: "Order ID",
       sortable: true,
       render: (row) => `#${row.id}`,
+    },
+    {
+      field: "user_id",
+      header: "User ID",
+      sortable: true,
+      render: (row) => row.user_id || "N/A",
     },
     {
       field: "status",
@@ -61,42 +71,22 @@ const OrdersPage = () => {
       header: "Order Date",
       sortable: true,
       render: (row) =>
-        row.created_at
-          ? new Date(row.created_at).toLocaleDateString("es-ES", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })
-          : "N/A",
-    },
-    {
-      header: "Items",
-      render: (row) => (
-        <Chip
-          label={`${row.items?.length || 0} items`}
-          size="small"
-          color="primary"
-          variant="outlined"
-        />
-      ),
+        row.created_at ? new Date(row.created_at).toLocaleDateString() : "N/A",
     },
   ];
 
   const handleRowClick = (order) => {
-    navigate(`/orders/${order.id}`, { state: { from: 'orders' } });
+    navigate(`/orders/${order.id}`, { state: { from: 'admin' } });
   };
-
-  if (orders)
-    orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-          My Orders
+          All Orders
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          View and manage your orders
+          View and manage all customer orders
         </Typography>
       </Box>
 
@@ -112,17 +102,14 @@ const OrdersPage = () => {
         loading={loading}
         onRowClick={handleRowClick}
         emptyState={{
-          icon: ReceiptIcon,
+          icon: ReceiptOutlined,
           iconColor: "primary.main",
-          title: "No Orders Yet",
-          description:
-            "You haven't placed any orders yet. Start shopping to create your first order and track your purchases here.",
-          actionLabel: "Start Shopping",
-          onAction: () => navigate("/products"),
+          title: "No Orders Found",
+          description: "There are no orders in the system yet.",
         }}
       />
     </Container>
   );
 };
 
-export default OrdersPage;
+export default AdminOrdersPage;

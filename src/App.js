@@ -10,12 +10,14 @@ import { setNotificationHandler } from "./services/api";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 // Pages
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProductsPage from "./pages/ProductsPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
@@ -25,6 +27,11 @@ import OrdersPage from "./pages/OrdersPage";
 import OrderDetailPage from "./pages/OrderDetailPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import ShippingPolicyPage from "./pages/ShippingPolicyPage";
+
+// Admin Pages
+import AdminCartsPage from "./pages/AdminCartsPage";
+import AdminOrdersPage from "./pages/AdminOrdersPage";
+import AdminProductsPage from "./pages/AdminProductsPage";
 
 /**
  * Inner app component to access snackbar
@@ -65,6 +72,14 @@ const AppContent = () => {
                   element={
                     <ProtectedRoute>
                       <ProductsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/products/:productId"
+                  element={
+                    <ProtectedRoute>
+                      <ProductDetailPage />
                     </ProtectedRoute>
                   }
                 />
@@ -122,6 +137,32 @@ const AppContent = () => {
                     <ProtectedRoute>
                       <OrderDetailPage />
                     </ProtectedRoute>
+                  }
+                />
+
+                {/* Admin routes */}
+                <Route
+                  path="/admin/carts"
+                  element={
+                    <AdminRoute>
+                      <AdminCartsPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/orders"
+                  element={
+                    <AdminRoute>
+                      <AdminOrdersPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/products"
+                  element={
+                    <AdminRoute>
+                      <AdminProductsPage />
+                    </AdminRoute>
                   }
                 />
               </Routes>

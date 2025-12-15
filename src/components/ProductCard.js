@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardMedia,
@@ -27,6 +28,7 @@ import { useSnackbar } from "notistack";
  * @param {boolean} [props.compact] - Compact mode for carousel
  */
 const ProductCard = ({ product, onAddToCart, compact = false }) => {
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [isFav, setIsFav] = useState(false);
   const { isFavorite, toggleFavorite, favorites } = useFavorites();
@@ -64,10 +66,15 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
     setQuantity(quantity + 1);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
     if (onAddToCart) {
       onAddToCart(product.id, quantity);
     }
+  };
+
+  const handleCardClick = () => {
+    navigate(`/products/${product.id}`);
   };
 
   const handleToggleFavorite = async (e) => {
@@ -96,6 +103,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
 
   return (
     <Card
+      onClick={handleCardClick}
       sx={{
         height: "100%",
         display: "flex",
@@ -103,6 +111,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
         position: "relative",
         borderRadius: 2,
         boxShadow: 2,
+        cursor: "pointer",
         transition: "transform 0.2s, box-shadow 0.2s",
         "&:hover": {
           transform: "translateY(-4px)",
@@ -235,6 +244,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
             {/* Quantity Controls */}
             {!compact && (
               <Box
+                onClick={(e) => e.stopPropagation()}
                 sx={{
                   display: "flex",
                   alignItems: "center",
@@ -246,7 +256,10 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
               >
                 <IconButton
                   size="small"
-                  onClick={handleDecrement}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDecrement();
+                  }}
                   disabled={quantity <= 1}
                   sx={{ color: "text.secondary" }}
                 >
@@ -264,7 +277,10 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
                 </Typography>
                 <IconButton
                   size="small"
-                  onClick={handleIncrement}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleIncrement();
+                  }}
                   disabled={
                     quantity >= maxQuantity ||
                     (!isAlwaysInStock && quantity >= product.stock)

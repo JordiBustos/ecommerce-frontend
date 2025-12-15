@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,17 +8,17 @@ import {
   TableRow,
   Paper,
   Box,
-  Typography,
   CircularProgress,
-} from '@mui/material';
-import PropTypes from 'prop-types';
-import EmptyState from './EmptyState';
-import { InboxOutlined } from '@mui/icons-material';
+  TableSortLabel,
+} from "@mui/material";
+import PropTypes from "prop-types";
+import EmptyState from "./EmptyState";
+import { InboxOutlined } from "@mui/icons-material";
 
 /**
  * Reusable DataTable component
  * Implements the Template Method pattern for consistent table rendering
- * 
+ *
  * @param {Array} columns - Column definitions [{ field, header, render }]
  * @param {Array} data - Table data
  * @param {boolean} loading - Loading state
@@ -34,14 +34,48 @@ const DataTable = ({
   onRowClick,
   sx = {},
 }) => {
+  const [orderBy, setOrderBy] = useState(null);
+  const [order, setOrder] = useState('asc');
+
+  const handleSort = (field) => {
+    const isAsc = orderBy === field && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(field);
+  };
+
+  const sortedData = React.useMemo(() => {
+    // Ensure data is an array
+    const dataArray = Array.isArray(data) ? data : [];
+    
+    if (!orderBy || !dataArray.length) return dataArray;
+    
+    return [...dataArray].sort((a, b) => {
+      const aVal = a[orderBy];
+      const bVal = b[orderBy];
+      
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+      
+      if (typeof aVal === 'string') {
+        return order === 'asc' 
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+      
+      return order === 'asc' 
+        ? aVal < bVal ? -1 : 1
+        : bVal < aVal ? -1 : 1;
+    });
+  }, [data, orderBy, order]);
+
   // Show loading state
   if (loading) {
     return (
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           minHeight: 200,
           ...sx,
         }}
@@ -52,14 +86,14 @@ const DataTable = ({
   }
 
   // Show empty state
-  if (!data || data.length === 0) {
+  if (!data || (Array.isArray(data) && data.length === 0) || (!Array.isArray(data) && Object.keys(data).length === 0)) {
     return (
       <EmptyState
         icon={emptyState.icon || InboxOutlined}
-        iconColor={emptyState.iconColor || 'grey.500'}
-        iconBgColor={emptyState.iconBgColor || 'grey.100'}
-        title={emptyState.title || 'No Data Available'}
-        description={emptyState.description || 'There are no items to display.'}
+        iconColor={emptyState.iconColor || "grey.500"}
+        iconBgColor={emptyState.iconBgColor || "grey.100"}
+        title={emptyState.title || "No Data Available"}
+        description={emptyState.description || "There are no items to display."}
         actionLabel={emptyState.actionLabel}
         onAction={emptyState.onAction}
       />
@@ -74,41 +108,51 @@ const DataTable = ({
             {columns.map((column, index) => (
               <TableCell
                 key={column.field || index}
-                align={column.align || 'left'}
+                align={column.align || "left"}
                 sx={{
                   fontWeight: 600,
-                  bgcolor: 'grey.50',
+                  bgcolor: "grey.50",
                   ...column.headerSx,
                 }}
               >
-                {column.header}
+                {column.sortable && column.field ? (
+                  <TableSortLabel
+                    active={orderBy === column.field}
+                    direction={orderBy === column.field ? order : 'asc'}
+                    onClick={() => handleSort(column.field)}
+                  >
+                    {column.header}
+                  </TableSortLabel>
+                ) : (
+                  column.header
+                )}
               </TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((row, rowIndex) => (
+          {sortedData.map((row, rowIndex) => (
             <TableRow
               key={row.id || rowIndex}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
               sx={{
-                cursor: onRowClick ? 'pointer' : 'default',
-                '&:hover': onRowClick
+                cursor: onRowClick ? "pointer" : "default",
+                "&:hover": onRowClick
                   ? {
-                      bgcolor: 'action.hover',
+                      bgcolor: "action.hover",
                     }
                   : {},
-                '&:last-child td, &:last-child th': { border: 0 },
+                "&:last-child td, &:last-child th": { border: 0 },
               }}
             >
               {columns.map((column, colIndex) => (
                 <TableCell
                   key={column.field || colIndex}
-                  align={column.align || 'left'}
+                  align={column.align || "left"}
                   sx={column.cellSx}
                 >
                   {column.render
-                    ? column.render(row[column.field], row, rowIndex)
+                    ? column.render(row)
                     : row[column.field]}
                 </TableCell>
               ))}
@@ -126,7 +170,8 @@ DataTable.propTypes = {
       field: PropTypes.string,
       header: PropTypes.string.isRequired,
       render: PropTypes.func,
-      align: PropTypes.oneOf(['left', 'center', 'right']),
+      align: PropTypes.oneOf(["left", "center", "right"]),
+      sortable: PropTypes.bool,
       headerSx: PropTypes.object,
       cellSx: PropTypes.object,
     })

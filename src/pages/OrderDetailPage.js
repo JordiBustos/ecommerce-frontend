@@ -31,7 +31,7 @@ import {
   Receipt as ReceiptIcon,
   Download as DownloadIcon,
 } from "@mui/icons-material";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import orderService from "../services/orderService";
 import productService from "../services/productService";
@@ -43,6 +43,7 @@ import config from "../config";
 const OrderDetailPage = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
   const [order, setOrder] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
@@ -186,7 +187,10 @@ const OrderDetailPage = () => {
       <Box sx={{ mb: 4 }}>
         <Button
           startIcon={<ArrowBackIcon />}
-          onClick={() => navigate("/orders")}
+          onClick={() => {
+            const from = location.state?.from;
+            navigate(from === 'admin' ? '/admin/orders' : '/orders');
+          }}
           sx={{ mb: 2 }}
         >
           Back to Orders
