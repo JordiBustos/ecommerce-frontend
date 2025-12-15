@@ -29,9 +29,11 @@ import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import ShippingPolicyPage from "./pages/ShippingPolicyPage";
 
 // Admin Pages
-import AdminCartsPage from "./pages/AdminCartsPage";
-import AdminOrdersPage from "./pages/AdminOrdersPage";
-import AdminProductsPage from "./pages/AdminProductsPage";
+import AdminCartsPage from "./pages/admin/AdminCartsPage";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import AdminEditOrderPage from "./pages/admin/AdminEditOrderPage";
+import AdminProductsPage from "./pages/admin/AdminProductsPage";
+import AdminEditProductPage from "./pages/admin/AdminEditProductPage";
 
 /**
  * Inner app component to access snackbar
@@ -57,10 +59,7 @@ const AppContent = () => {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route
-                  path="/privacy-policy"
-                  element={<PrivacyPolicyPage />}
-                />
+                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route
                   path="/shipping-policy"
                   element={<ShippingPolicyPage />}
@@ -158,10 +157,26 @@ const AppContent = () => {
                   }
                 />
                 <Route
+                  path="/admin/orders/:orderId/edit"
+                  element={
+                    <AdminRoute>
+                      <AdminEditOrderPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
                   path="/admin/products"
                   element={
                     <AdminRoute>
                       <AdminProductsPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/products/:productId/edit"
+                  element={
+                    <AdminRoute>
+                      <AdminEditProductPage />
                     </AdminRoute>
                   }
                 />

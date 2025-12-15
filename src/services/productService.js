@@ -1,4 +1,4 @@
-import apiClient from './api';
+import apiClient from "./api";
 
 /**
  * @typedef {Object} Product
@@ -21,7 +21,7 @@ const productService = {
    * @returns {Promise<Product[]>} List of products
    */
   async getProducts(params = {}) {
-    const response = await apiClient.get('/products/', { params });
+    const response = await apiClient.get("/products/", { params });
     return response.data;
   },
 
@@ -44,8 +44,8 @@ const productService = {
    * @returns {Promise<{products: Product[], total: number}>} Matching products with total count
    */
   async searchProducts(query, params = {}) {
-    const response = await apiClient.get('/products/search/', { 
-      params: { q: query, ...params } 
+    const response = await apiClient.get("/products/search/", {
+      params: { q: query, ...params },
     });
     return response.data;
   },
@@ -55,7 +55,7 @@ const productService = {
    * @returns {Promise<Array>} List of categories
    */
   async getCategories() {
-    const response = await apiClient.get('/products/categories');
+    const response = await apiClient.get("/products/categories");
     return response.data;
   },
 
@@ -64,7 +64,7 @@ const productService = {
    * @returns {Promise<Array>} List of brands
    */
   async getBrands() {
-    const response = await apiClient.get('/products/brands');
+    const response = await apiClient.get("/products/brands");
     return response.data;
   },
 
@@ -73,7 +73,28 @@ const productService = {
    * @returns {Promise<Product[]>} Best selling products
    */
   async getBestSelling() {
-    const response = await apiClient.get('/best-selling/');
+    const response = await apiClient.get("/best-selling/");
+    return response.data;
+  },
+
+  /**
+   * Update product by ID
+   * @param {number} productId - Product ID
+   * @param {Object} productData - Product data to update
+   * @returns {Promise<Product>} Updated product data
+   */
+  async updateProduct(productId, productData) {
+    const response = await apiClient.put(`/products/${productId}`, productData);
+    return response.data;
+  },
+
+  /**
+   * Delete product by ID
+   * @param {number} productId - Product ID
+   * @returns {Promise<void>}
+   */
+  async deleteProduct(productId) {
+    const response = await apiClient.delete(`/products/${productId}`);
     return response.data;
   },
 };

@@ -1,23 +1,9 @@
-import { Container, Typography, Box, Chip } from "@mui/material";
+import { Container, Typography, Chip } from "@mui/material";
 import { Receipt as ReceiptIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import useDataFetching from "../hooks/useDataFetching";
-import DataTable from "../components/DataTable";
+import { DataTable, StatusChip, PageHeader } from "../components";
 import orderService from "../services/orderService";
-
-/**
- * Get status color based on order status
- */
-const getStatusColor = (status) => {
-  const statusColors = {
-    pending: "warning",
-    processing: "info",
-    shipped: "primary",
-    delivered: "success",
-    cancelled: "error",
-  };
-  return statusColors[status?.toLowerCase()] || "default";
-};
 
 /**
  * Orders page component - Lists all user orders
@@ -42,13 +28,7 @@ const OrdersPage = () => {
       field: "status",
       header: "Status",
       sortable: true,
-      render: (row) => (
-        <Chip
-          label={row.status || "Unknown"}
-          color={getStatusColor(row.status)}
-          size="small"
-        />
-      ),
+      render: (row) => <StatusChip status={row.status} />,
     },
     {
       field: "total_amount",
@@ -91,14 +71,10 @@ const OrdersPage = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-          My Orders
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          View and manage your orders
-        </Typography>
-      </Box>
+      <PageHeader
+        title="My Orders"
+        description="View and manage your orders"
+      />
 
       {error && (
         <Typography color="error" sx={{ mb: 2 }}>
