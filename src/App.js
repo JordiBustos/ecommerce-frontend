@@ -31,6 +31,7 @@ import ShippingPolicyPage from "./pages/ShippingPolicyPage";
 // Admin Pages
 import AdminCartsPage from "./pages/admin/AdminCartsPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import AdminEditOrderPage from "./pages/admin/AdminEditOrderPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminEditProductPage from "./pages/admin/AdminEditProductPage";
 
@@ -152,6 +153,14 @@ const AppContent = () => {
                   element={
                     <AdminRoute>
                       <AdminOrdersPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/orders/:orderId/edit"
+                  element={
+                    <AdminRoute>
+                      <AdminEditOrderPage />
                     </AdminRoute>
                   }
                 />

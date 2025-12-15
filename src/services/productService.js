@@ -84,10 +84,7 @@ const productService = {
    * @returns {Promise<Product>} Updated product data
    */
   async updateProduct(productId, productData) {
-    const response = await apiClient.put(
-      `/products/${productId}`,
-      productData
-    );
+    const response = await apiClient.put(`/products/${productId}`, productData);
     return response.data;
   },
 

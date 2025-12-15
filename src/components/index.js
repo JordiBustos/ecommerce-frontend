@@ -8,3 +8,7 @@ export { default as ProductCarousel } from './ProductCarousel';
 export { default as ProtectedRoute } from './ProtectedRoute';
 export { default as AdminRoute } from './AdminRoute';
 export { default as Footer } from './Footer';
+export { default as FilterPanel } from './FilterPanel';
+export { default as StatusChip } from './StatusChip';
+export { default as PageHeader } from './PageHeader';
+
