@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Container,
   Typography,
@@ -11,7 +11,6 @@ import {
   FormControl,
   InputLabel,
   Select,
-  Paper,
   Grid,
   Dialog,
   DialogTitle,
@@ -24,14 +23,11 @@ import {
   InventoryOutlined,
   AddOutlined,
   Edit as EditIcon,
-  FilterList as FilterListIcon,
-  Clear as ClearIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import useDataFetching from "../../hooks/useDataFetching";
-import DataTable from "../../components/DataTable";
+import { DataTable, PageHeader, FilterPanel } from "../../components";
 import productService from "../../services/productService";
 
 /**
@@ -43,6 +39,9 @@ const AdminProductsPage = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // Pagination states
   const [page, setPage] = useState(1);
@@ -61,43 +60,6 @@ const AdminProductsPage = () => {
   const [productToDelete, setProductToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const {
-    data: response,
-    loading,
-    error,
-  } = useDataFetching(() => {
-    const skip = (page - 1) * itemsPerPage;
-    return productService.getProducts({ skip, limit: itemsPerPage });
-  }, [refreshKey, page]);
-
-  // Extract products array from response
-  const products = Array.isArray(response)
-    ? response
-    : response?.products || [];
-
-  // Update total products count when response changes
-  useEffect(() => {
-    if (response) {
-      // If API returns total, use it; otherwise estimate from products length
-      if (response.total !== undefined) {
-        setTotalProducts(response.total);
-      } else if (Array.isArray(response)) {
-        // If no pagination info, assume this is all products
-        setTotalProducts(response.length);
-      } else if (response.products) {
-        // Estimate based on whether we got a full page
-        const currentCount = response.products.length;
-        if (currentCount < itemsPerPage) {
-          // Last page
-          setTotalProducts((page - 1) * itemsPerPage + currentCount);
-        } else {
-          // More pages might exist, estimate
-          setTotalProducts(page * itemsPerPage + 1);
-        }
-      }
-    }
-  }, [response, page, itemsPerPage]);
-
   // Load categories and brands for filters
   useEffect(() => {
     const loadFilters = async () => {
@@ -115,39 +77,87 @@ const AdminProductsPage = () => {
     loadFilters();
   }, []);
 
-  // Apply filters to products
+  /**
+   * Load products
+   */
+  const loadProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const skip = (page - 1) * itemsPerPage;
+      const params = {
+        skip,
+        limit: itemsPerPage,
+      };
+
+      // Add API-supported filters
+      if (searchQuery) {
+        params.search = searchQuery;
+      }
+      if (selectedCategory) {
+        params.categories_id = [parseInt(selectedCategory)];
+      }
+      if (selectedBrand) {
+        params.brands_id = [parseInt(selectedBrand)];
+      }
+
+      const data = await productService.getProducts(params);
+
+      // Handle both array and object responses
+      if (Array.isArray(data)) {
+        setProducts(data);
+        setTotalProducts(data.length);
+      } else if (data.products) {
+        setProducts(data.products);
+        setTotalProducts(data.total || data.products.length);
+      } else {
+        setProducts([]);
+        setTotalProducts(0);
+      }
+    } catch (err) {
+      const errorMsg = "Failed to load products";
+      setError(errorMsg);
+      enqueueSnackbar(errorMsg, { variant: "error" });
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    page,
+    searchQuery,
+    selectedCategory,
+    selectedBrand,
+    itemsPerPage,
+    enqueueSnackbar,
+  ]);
+
+  /**
+   * Load products when filters or page change
+   */
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+
+  /**
+   * Reload products (for after delete)
+   */
+  useEffect(() => {
+    if (refreshKey > 0) {
+      loadProducts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey]);
+
+  // Apply client-side filters (status and stock - not supported by API)
   const filteredProducts = useMemo(() => {
     if (!products) return [];
 
     return products.filter((product) => {
-      // Search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch =
-          product.name?.toLowerCase().includes(query) ||
-          product.sku?.toLowerCase().includes(query) ||
-          product.description?.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
-      }
-
-      // Category filter
-      if (
-        selectedCategory &&
-        product.category_id !== parseInt(selectedCategory)
-      ) {
-        return false;
-      }
-
-      // Brand filter
-      if (selectedBrand && product.brand_id !== parseInt(selectedBrand)) {
-        return false;
-      }
-
-      // Status filter
+      // Status filter (client-side only)
       if (selectedStatus === "active" && !product.is_active) return false;
       if (selectedStatus === "inactive" && product.is_active) return false;
 
-      // Stock filter
+      // Stock filter (client-side only)
       if (selectedStock) {
         const stock = product.stock || 0;
         if (selectedStock === "out-of-stock" && stock !== 0) return false;
@@ -158,14 +168,7 @@ const AdminProductsPage = () => {
 
       return true;
     });
-  }, [
-    products,
-    searchQuery,
-    selectedCategory,
-    selectedBrand,
-    selectedStatus,
-    selectedStock,
-  ]);
+  }, [products, selectedStatus, selectedStock]);
 
   const columns = [
     {
@@ -257,6 +260,31 @@ const AdminProductsPage = () => {
     setRefreshKey((prev) => prev + 1);
   };
 
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    setPage(1); // Reset to first page
+  };
+
+  const handleCategoryChange = (value) => {
+    setSelectedCategory(value);
+    setPage(1); // Reset to first page
+  };
+
+  const handleBrandChange = (value) => {
+    setSelectedBrand(value);
+    setPage(1); // Reset to first page
+  };
+
+  const handleStatusChange = (value) => {
+    setSelectedStatus(value);
+    // Status is client-side filter, no need to reset page
+  };
+
+  const handleStockChange = (value) => {
+    setSelectedStock(value);
+    // Stock is client-side filter, no need to reset page
+  };
+
   const handleClearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("");
@@ -312,44 +340,33 @@ const AdminProductsPage = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box
-        sx={{
-          mb: 4,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-        }}
-      >
-        <Box>
-          <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-            All Products
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            View and manage all products in the inventory
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <Button variant="outlined" onClick={handleRefresh} disabled={loading}>
-            Refresh
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddOutlined />}
-            onClick={() => alert("Add product feature - to be implemented")}
-          >
-            Add Product
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddOutlined />}
-            onClick={() =>
-              alert("Add products from CSV feature - to be implemented")
-            }
-          >
-            Import products from CSV
-          </Button>
-        </Box>
-      </Box>
+      <PageHeader
+        title="All Products"
+        description="View and manage all products in the inventory"
+        action={
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Button variant="outlined" onClick={handleRefresh} disabled={loading}>
+              Refresh
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddOutlined />}
+              onClick={() => alert("Add product feature - to be implemented")}
+            >
+              Add Product
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddOutlined />}
+              onClick={() =>
+                alert("Add products from CSV feature - to be implemented")
+              }
+            >
+              Import products from CSV
+            </Button>
+          </Box>
+        }
+      />
 
       {error && (
         <Typography color="error" sx={{ mb: 2 }}>
@@ -358,25 +375,34 @@ const AdminProductsPage = () => {
       )}
 
       {/* Filters Section */}
-      <Paper elevation={1} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <FilterListIcon sx={{ mr: 1, color: "primary.main" }} />
-          <Typography variant="h6" sx={{ fontWeight: 600, flexGrow: 1 }}>
-            Filters
-          </Typography>
-          {hasActiveFilters && (
-            <Button
-              startIcon={<ClearIcon />}
-              onClick={handleClearFilters}
-              size="small"
-              color="secondary"
-            >
-              Clear Filters
-            </Button>
-          )}
-        </Box>
-
-        <Grid container spacing={2}>
+      <FilterPanel
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={handleClearFilters}
+        resultsInfo={
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              {selectedStatus || selectedStock ? (
+                <>
+                  Showing {filteredProducts.length} of {products.length} products
+                  on this page (Total: {totalProducts})
+                </>
+              ) : (
+                <>
+                  Showing {products.length} of {totalProducts} products
+                </>
+              )}
+            </Typography>
+            {hasActiveFilters && (
+              <Chip
+                label="Filtered"
+                size="small"
+                color="primary"
+                variant="outlined"
+              />
+            )}
+          </Box>
+        }
+      >
           {/* Search */}
           <Grid item xs={12} md={3}>
             <TextField
@@ -385,7 +411,7 @@ const AdminProductsPage = () => {
               label="Search"
               placeholder="Name, SKU, Description..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </Grid>
 
@@ -395,7 +421,7 @@ const AdminProductsPage = () => {
               <InputLabel>Category</InputLabel>
               <Select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => handleCategoryChange(e.target.value)}
                 label="Category"
               >
                 <MenuItem value="">All Categories</MenuItem>
@@ -414,7 +440,7 @@ const AdminProductsPage = () => {
               <InputLabel>Brand</InputLabel>
               <Select
                 value={selectedBrand}
-                onChange={(e) => setSelectedBrand(e.target.value)}
+                onChange={(e) => handleBrandChange(e.target.value)}
                 label="Brand"
               >
                 <MenuItem value="">All Brands</MenuItem>
@@ -433,7 +459,7 @@ const AdminProductsPage = () => {
               <InputLabel>Status</InputLabel>
               <Select
                 value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
+                onChange={(e) => handleStatusChange(e.target.value)}
                 label="Status"
               >
                 <MenuItem value="">All Status</MenuItem>
@@ -449,7 +475,7 @@ const AdminProductsPage = () => {
               <InputLabel>Stock Level</InputLabel>
               <Select
                 value={selectedStock}
-                onChange={(e) => setSelectedStock(e.target.value)}
+                onChange={(e) => handleStockChange(e.target.value)}
                 label="Stock Level"
               >
                 <MenuItem value="">All Stock Levels</MenuItem>
@@ -459,23 +485,7 @@ const AdminProductsPage = () => {
               </Select>
             </FormControl>
           </Grid>
-        </Grid>
-
-        {/* Results count */}
-        <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            Showing {filteredProducts.length} of {totalProducts} products
-          </Typography>
-          {hasActiveFilters && (
-            <Chip
-              label="Filtered"
-              size="small"
-              color="primary"
-              variant="outlined"
-            />
-          )}
-        </Box>
-      </Paper>
+      </FilterPanel>
 
       <DataTable
         columns={columns}
@@ -494,7 +504,7 @@ const AdminProductsPage = () => {
       />
 
       {/* Pagination */}
-      {!hasActiveFilters && filteredProducts.length > 0 && (
+      {totalProducts > itemsPerPage && (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
           <Pagination
             count={Math.ceil(totalProducts / itemsPerPage)}

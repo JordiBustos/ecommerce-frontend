@@ -1,13 +1,11 @@
-import React from 'react';
 import {
   Container,
   Typography,
-  Box,
   Chip,
 } from '@mui/material';
 import { ShoppingCartOutlined } from '@mui/icons-material';
 import useDataFetching from '../../hooks/useDataFetching';
-import DataTable from '../../components/DataTable';
+import { DataTable, PageHeader } from '../../components';
 import apiClient from '../../services/api';
 
 /**
@@ -81,14 +79,10 @@ const AdminCartsPage = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-          All Carts
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          View and manage all user shopping carts
-        </Typography>
-      </Box>
+      <PageHeader
+        title="All Carts"
+        description="View and manage all user shopping carts"
+      />
 
       {error && (
         <Typography color="error" sx={{ mb: 2 }}>
