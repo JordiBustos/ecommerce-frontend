@@ -16,6 +16,7 @@ import {
   Pagination,
   IconButton,
   Drawer,
+  Chip,
 } from "@mui/material";
 import {
   FilterList as FilterListIcon,
@@ -48,6 +49,7 @@ const ProductsPage = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllBrands, setShowAllBrands] = useState(false);
+  const [categoryPath, setCategoryPath] = useState([]); // Track drill-down path
   const itemsPerPage = 12;
   const { addToCart } = useCart();
   const { enqueueSnackbar } = useSnackbar();
@@ -160,16 +162,82 @@ const ProductsPage = () => {
   }, [loadProducts]);
 
   /**
-   * Handle category filter change
+   * Get all descendant category IDs for a given category
+   * @param {number} categoryId - Parent category ID
+   * @returns {number[]} Array of all descendant category IDs
    */
-  const handleCategoryChange = (categoryId) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
-    );
-    setSearchQuery(""); // Clear search when using filters
-    setPage(1); // Reset to first page
+  const getDescendantCategoryIds = useCallback(
+    (categoryId) => {
+      const descendants = [];
+      const findChildren = (parentId) => {
+        const children = categories.filter((cat) => cat.parent_id === parentId);
+        children.forEach((child) => {
+          descendants.push(child.id);
+          findChildren(child.id); // Recursively find grandchildren
+        });
+      };
+      findChildren(categoryId);
+      return descendants;
+    },
+    [categories]
+  );
+
+  /**
+   * Get children of a category
+   */
+  const getCategoryChildren = useCallback(
+    (parentId) => {
+      return categories.filter((cat) => cat.parent_id === parentId);
+    },
+    [categories]
+  );
+
+  /**
+   * Handle category drill-down navigation
+   */
+  const handleCategoryClick = (category) => {
+    const children = getCategoryChildren(category.id);
+    
+    if (children.length > 0) {
+      // Has children, add to path for drill-down
+      setCategoryPath((prev) => [...prev, category]);
+    } else {
+      // No children, select for filtering
+      setSelectedCategories([category.id]);
+      setSearchQuery("");
+      setPage(1);
+    }
+  };
+
+  /**
+   * Handle filtering by parent category (including all descendants)
+   */
+  const handleFilterByParentCategory = (category) => {
+    const descendants = getDescendantCategoryIds(category.id);
+    setSelectedCategories([category.id, ...descendants]);
+    setSearchQuery("");
+    setPage(1);
+  };
+
+  /**
+   * Navigate back in category path
+   */
+  const handleCategoryBack = (index) => {
+    if (index === -1) {
+      // Back to root
+      setCategoryPath([]);
+    } else {
+      // Back to specific level
+      setCategoryPath((prev) => prev.slice(0, index + 1));
+    }
+  };
+
+  /**
+   * Clear category navigation and filters
+   */
+  const clearCategoryNavigation = () => {
+    setCategoryPath([]);
+    setSelectedCategories([]);
   };
 
   /**
@@ -193,6 +261,7 @@ const ProductsPage = () => {
     setSelectedBrands([]);
     setSearchQuery("");
     setPage(1);
+    setCategoryPath([]);
   };
 
   /**
@@ -229,9 +298,18 @@ const ProductsPage = () => {
    * Filters sidebar component
    */
   const FiltersSidebar = () => {
+    // Get current level categories based on path
+    const currentParentId = categoryPath.length > 0 
+      ? categoryPath[categoryPath.length - 1].id 
+      : null;
+    
+    const currentLevelCategories = categories.filter(
+      (cat) => cat.parent_id === currentParentId
+    );
+
     const displayedCategories = showAllCategories
-      ? categories
-      : categories.slice(0, 5);
+      ? currentLevelCategories
+      : currentLevelCategories.slice(0, 10);
     const displayedBrands = showAllBrands ? brands : brands.slice(0, 5);
 
     return (
@@ -258,22 +336,117 @@ const ProductsPage = () => {
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
           Categories
         </Typography>
-        <FormGroup sx={{ mb: 1 }}>
-          {displayedCategories.map((category) => (
-            <FormControlLabel
-              key={category.id}
-              control={
-                <Checkbox
-                  checked={selectedCategories.includes(category.id)}
-                  onChange={() => handleCategoryChange(category.id)}
+
+        {/* Breadcrumb navigation */}
+        {categoryPath.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            <Button
+              size="small"
+              onClick={() => handleCategoryBack(-1)}
+              sx={{ mb: 1, textTransform: "none" }}
+            >
+              ← All Categories
+            </Button>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1 }}>
+              {categoryPath.map((cat, index) => (
+                <Box key={cat.id} sx={{ display: "flex", alignItems: "center" }}>
+                  <Button
+                    size="small"
+                    onClick={() => handleCategoryBack(index - 1)}
+                    sx={{ 
+                      textTransform: "none", 
+                      minWidth: "auto",
+                      color: "text.secondary",
+                      fontSize: "0.875rem"
+                    }}
+                  >
+                    {cat.name}
+                  </Button>
+                  {index < categoryPath.length - 1 && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mx: 0.5 }}>
+                      /
+                    </Typography>
+                  )}
+                </Box>
+              ))}
+            </Box>
+            <Divider sx={{ my: 1 }} />
+          </Box>
+        )}
+
+        {/* Selected category chip */}
+        {selectedCategories.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            {selectedCategories.slice(0, 3).map((catId) => {
+              const category = categories.find((c) => c.id === catId);
+              return category ? (
+                <Chip
+                  key={catId}
+                  label={category.name}
+                  onDelete={clearCategoryNavigation}
                   size="small"
+                  color="primary"
+                  sx={{ mr: 1, mb: 1 }}
                 />
-              }
-              label={<Typography variant="body2">{category.name}</Typography>}
-            />
-          ))}
-        </FormGroup>
-        {categories.length > 5 && (
+              ) : null;
+            })}
+            {selectedCategories.length > 3 && (
+              <Chip
+                label={`+${selectedCategories.length - 3} more`}
+                size="small"
+                color="primary"
+                variant="outlined"
+                sx={{ mr: 1, mb: 1 }}
+              />
+            )}
+          </Box>
+        )}
+
+        {/* Filter by current parent category */}
+        {categoryPath.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            <Button
+              fullWidth
+              variant="contained"
+              size="small"
+              onClick={() => handleFilterByParentCategory(categoryPath[categoryPath.length - 1])}
+              sx={{ textTransform: "none" }}
+            >
+              Show all {categoryPath[categoryPath.length - 1].name} products
+            </Button>
+          </Box>
+        )}
+
+        {/* Current level categories */}
+        <Box sx={{ mb: 1 }}>
+          {displayedCategories.map((category) => {
+            const hasChildren = getCategoryChildren(category.id).length > 0;
+            return (
+              <Button
+                key={category.id}
+                fullWidth
+                onClick={() => handleCategoryClick(category)}
+                sx={{
+                  justifyContent: "space-between",
+                  textTransform: "none",
+                  mb: 0.5,
+                  py: 1,
+                  px: 2,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  "&:hover": {
+                    borderColor: "primary.main",
+                    bgcolor: "action.hover",
+                  },
+                }}
+              >
+                <Typography variant="body2">{category.name}</Typography>
+                {hasChildren && <ExpandMoreIcon fontSize="small" sx={{ transform: "rotate(-90deg)" }} />}
+              </Button>
+            );
+          })}
+        </Box>
+        {currentLevelCategories.length > 10 && (
           <Button
             size="small"
             onClick={() => setShowAllCategories(!showAllCategories)}
@@ -282,7 +455,7 @@ const ProductsPage = () => {
             }
             sx={{ mb: 2 }}
           >
-            {showAllCategories ? "Show Less" : `See All (${categories.length})`}
+            {showAllCategories ? "Show Less" : `See All (${currentLevelCategories.length})`}
           </Button>
         )}
 
