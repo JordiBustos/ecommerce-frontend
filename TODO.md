@@ -4,10 +4,10 @@
 
 ### Admin Panel
 
-- [ ] **Add Product Page**: Crear página completa para agregar productos desde el admin
 - [ ] **Add Order (Admin)**: Permitir a admins crear órdenes manualmente para usuarios
 - [ ] **Admin navigation**: Reemplazar botones de admin en navbar por una navegación dedicada/sidebar
 - [ ] **Cart Admin View**: Corregir y mejorar la vista de administración de todos los carritos
+- [ ] **Categorías en dropdown**: Corregir jerarquía
 
 ### User Experience
 
@@ -29,9 +29,10 @@
 ### CRUD Completo
 
 - [ ] **Listas de precios**: Gestión de precios por mayorista/minorista
-- [ ] **Import/Export CSV**: Importar y exportar productos masivamente
+- [ ] **Export CSV**: Exportar productos masivamente
 - [ ] **Bulk operations**: Editar múltiples productos a la vez (precio, stock, status) (quizá se resuelve con 2.)
 - [ ] **Product variants**: Soporte para variantes (talla, color, etc.)
+- [ ] **Product images**: Soporte para varias imagenes
 
 ### Órdenes y Compras
 

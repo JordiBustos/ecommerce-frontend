@@ -78,6 +78,38 @@ const productService = {
   },
 
   /**
+   * Create a new product
+   * @param {Object} productData - Product data
+   * @returns {Promise<Product>} Created product
+   */
+  async createProduct(productData) {
+    const response = await apiClient.post("/products/", productData);
+    return response.data;
+  },
+
+  /**
+   * Import products from CSV file
+   * @param {File} file - CSV file
+   * @param {number} [batchSize=50] - Number of products to process per batch
+   * @returns {Promise<Object>} Import results with total_rows, successful, failed, errors, message
+   */
+  async importProductsFromCSV(file, batchSize = 50) {
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    const response = await apiClient.post(
+      `/products/import/csv?batch_size=${batchSize}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  },
+
+  /**
    * Update product by ID
    * @param {number} productId - Product ID
    * @param {Object} productData - Product data to update
@@ -95,6 +127,15 @@ const productService = {
    */
   async deleteProduct(productId) {
     const response = await apiClient.delete(`/products/${productId}`);
+    return response.data;
+  },
+
+  /**
+   * Delete all products (DANGEROUS)
+   * @returns {Promise<Object>} Deletion result
+   */
+  async deleteAllProducts() {
+    const response = await apiClient.delete("/products/all");
     return response.data;
   },
 

@@ -18,12 +18,18 @@ import {
   DialogContentText,
   DialogActions,
   Pagination,
+  Alert,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import {
   InventoryOutlined,
   AddOutlined,
   Edit as EditIcon,
   Delete as DeleteIcon,
+  Warning as WarningIcon,
+  ExpandMore as ExpandMoreIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
@@ -43,26 +49,31 @@ const AdminProductsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Pagination states
   const [page, setPage] = useState(1);
   const [itemsPerPage] = useState(20);
   const [totalProducts, setTotalProducts] = useState(0);
 
-  // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedStatus, setSelectedStatus] = useState(""); // all, active, inactive
   const [selectedStock, setSelectedStock] = useState(""); // all, in-stock, low-stock, out-of-stock
-  
-  // Sorting states
+
   const [sortBy, setSortBy] = useState(""); // price, stock, created_at
   const [sortOrder, setSortOrder] = useState("desc"); // asc, desc
 
-  // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+
+  const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
+  const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
+  const [deletingAll, setDeletingAll] = useState(false);
 
   // Load categories and brands for filters
   useEffect(() => {
@@ -80,6 +91,121 @@ const AdminProductsPage = () => {
     };
     loadFilters();
   }, []);
+
+  /**
+   * Handle import modal open
+   */
+  const handleOpenImportModal = () => {
+    setImportModalOpen(true);
+    setImportFile(null);
+    setImportResult(null);
+  };
+
+  /**
+   * Handle import modal close
+   */
+  const handleCloseImportModal = () => {
+    setImportModalOpen(false);
+    setImportFile(null);
+    setImportResult(null);
+  };
+
+  /**
+   * Handle file selection
+   */
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (!file.name.endsWith(".csv")) {
+        enqueueSnackbar("Please select a CSV file", { variant: "error" });
+        return;
+      }
+      setImportFile(file);
+      setImportResult(null);
+    }
+  };
+
+  /**
+   * Handle CSV import
+   */
+  const handleImport = async () => {
+    if (!importFile) {
+      enqueueSnackbar("Please select a file", { variant: "warning" });
+      return;
+    }
+
+    try {
+      setImporting(true);
+      const result = await productService.importProductsFromCSV(importFile);
+      setImportResult(result);
+
+      if (result.successful > 0) {
+        enqueueSnackbar(`Successfully imported ${result.successful} products`, {
+          variant: "success",
+        });
+        // Refresh the products list
+        setRefreshKey((prev) => prev + 1);
+      }
+
+      if (result.failed > 0) {
+        enqueueSnackbar(`${result.failed} products failed to import`, {
+          variant: "warning",
+        });
+      }
+    } catch (error) {
+      enqueueSnackbar(
+        error.response?.data?.detail || "Failed to import products",
+        { variant: "error" }
+      );
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  /**
+   * Handle delete all products dialog open
+   */
+  const handleOpenDeleteAllDialog = () => {
+    setDeleteAllDialogOpen(true);
+    setDeleteAllConfirmText("");
+  };
+
+  /**
+   * Handle delete all products dialog close
+   */
+  const handleCloseDeleteAllDialog = () => {
+    setDeleteAllDialogOpen(false);
+    setDeleteAllConfirmText("");
+  };
+
+  /**
+   * Handle delete all products confirm
+   */
+  const handleDeleteAllConfirm = async () => {
+    if (deleteAllConfirmText !== "DELETE ALL PRODUCTS") {
+      enqueueSnackbar("Please type the confirmation text correctly", {
+        variant: "warning",
+      });
+      return;
+    }
+
+    try {
+      setDeletingAll(true);
+      const result = await productService.deleteAllProducts();
+      enqueueSnackbar(result.message || "All products deleted successfully", {
+        variant: "success",
+      });
+      handleCloseDeleteAllDialog();
+      setRefreshKey((prev) => prev + 1);
+    } catch (error) {
+      enqueueSnackbar(
+        error.response?.data?.detail || "Failed to delete all products",
+        { variant: "error" }
+      );
+    } finally {
+      setDeletingAll(false);
+    }
+  };
 
   /**
    * Load products
@@ -370,11 +496,11 @@ const AdminProductsPage = () => {
 
   const hasActiveFilters = Boolean(
     searchQuery ||
-    selectedCategory ||
-    selectedBrand ||
-    selectedStatus ||
-    selectedStock ||
-    sortBy
+      selectedCategory ||
+      selectedBrand ||
+      selectedStatus ||
+      selectedStock ||
+      sortBy
   );
 
   return (
@@ -384,24 +510,26 @@ const AdminProductsPage = () => {
         description="View and manage all products in the inventory"
         action={
           <Box sx={{ display: "flex", gap: 2 }}>
-            <Button variant="outlined" onClick={handleRefresh} disabled={loading}>
+            <Button
+              variant="outlined"
+              onClick={handleRefresh}
+              disabled={loading}
+            >
               Refresh
             </Button>
             <Button
               variant="contained"
               startIcon={<AddOutlined />}
-              onClick={() => alert("Add product feature - to be implemented")}
+              onClick={() => navigate("/admin/products/add")}
             >
               Add Product
             </Button>
             <Button
               variant="contained"
               startIcon={<AddOutlined />}
-              onClick={() =>
-                alert("Add products from CSV feature - to be implemented")
-              }
+              onClick={handleOpenImportModal}
             >
-              Import products from CSV
+              Import from CSV
             </Button>
           </Box>
         }
@@ -422,8 +550,8 @@ const AdminProductsPage = () => {
             <Typography variant="body2" color="text.secondary">
               {selectedStatus || selectedStock ? (
                 <>
-                  Showing {filteredProducts.length} of {products.length} products
-                  on this page (Total: {totalProducts})
+                  Showing {filteredProducts.length} of {products.length}{" "}
+                  products on this page (Total: {totalProducts})
                 </>
               ) : (
                 <>
@@ -442,126 +570,126 @@ const AdminProductsPage = () => {
           </Box>
         }
       >
-          {/* Search */}
-          <Grid item xs={12} md={3}>
-            <TextField
-              fullWidth
-              size="small"
-              label="Search"
-              placeholder="Name, SKU, Description..."
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-            />
-          </Grid>
+        {/* Search */}
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            label="Search"
+            placeholder="Name, SKU, Description..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+          />
+        </Grid>
 
-          {/* Category Filter */}
+        {/* Category Filter */}
+        <Grid item xs={12} md={2}>
+          <FormControl fullWidth size="small">
+            <InputLabel>Category</InputLabel>
+            <Select
+              value={selectedCategory}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              label="Category"
+            >
+              <MenuItem value="">All Categories</MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        {/* Brand Filter */}
+        <Grid item xs={12} md={2}>
+          <FormControl fullWidth size="small">
+            <InputLabel>Brand</InputLabel>
+            <Select
+              value={selectedBrand}
+              onChange={(e) => handleBrandChange(e.target.value)}
+              label="Brand"
+            >
+              <MenuItem value="">All Brands</MenuItem>
+              {brands.map((brand) => (
+                <MenuItem key={brand.id} value={brand.id}>
+                  {brand.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        {/* Status Filter */}
+        <Grid item xs={12} md={2}>
+          <FormControl fullWidth size="small">
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={selectedStatus}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              label="Status"
+            >
+              <MenuItem value="">All Status</MenuItem>
+              <MenuItem value="active">Active</MenuItem>
+              <MenuItem value="inactive">Inactive</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        {/* Stock Filter */}
+        <Grid item xs={12} md={2}>
+          <FormControl fullWidth size="small">
+            <InputLabel>Stock Level</InputLabel>
+            <Select
+              value={selectedStock}
+              onChange={(e) => handleStockChange(e.target.value)}
+              label="Stock Level"
+            >
+              <MenuItem value="">All Stock Levels</MenuItem>
+              <MenuItem value="in-stock">In Stock</MenuItem>
+              <MenuItem value="low-stock">Low Stock (&lt;10)</MenuItem>
+              <MenuItem value="out-of-stock">Out of Stock</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        {/* Sort By */}
+        <Grid item xs={12} md={2}>
+          <FormControl fullWidth size="small">
+            <InputLabel>Sort By</InputLabel>
+            <Select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              label="Sort By"
+            >
+              <MenuItem value="">Default</MenuItem>
+              <MenuItem value="price">Price</MenuItem>
+              <MenuItem value="stock">Stock</MenuItem>
+              <MenuItem value="created_at">Date Created</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        {/* Sort Order */}
+        {sortBy && (
           <Grid item xs={12} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>Category</InputLabel>
+              <InputLabel>Order</InputLabel>
               <Select
-                value={selectedCategory}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-                label="Category"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                label="Order"
               >
-                <MenuItem value="">All Categories</MenuItem>
-                {categories.map((category) => (
-                  <MenuItem key={category.id} value={category.id}>
-                    {category.name}
-                  </MenuItem>
-                ))}
+                <MenuItem value="asc">
+                  {sortBy === "created_at" ? "Oldest First" : "Low to High"}
+                </MenuItem>
+                <MenuItem value="desc">
+                  {sortBy === "created_at" ? "Newest First" : "High to Low"}
+                </MenuItem>
               </Select>
             </FormControl>
           </Grid>
-
-          {/* Brand Filter */}
-          <Grid item xs={12} md={2}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Brand</InputLabel>
-              <Select
-                value={selectedBrand}
-                onChange={(e) => handleBrandChange(e.target.value)}
-                label="Brand"
-              >
-                <MenuItem value="">All Brands</MenuItem>
-                {brands.map((brand) => (
-                  <MenuItem key={brand.id} value={brand.id}>
-                    {brand.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          {/* Status Filter */}
-          <Grid item xs={12} md={2}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={selectedStatus}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                label="Status"
-              >
-                <MenuItem value="">All Status</MenuItem>
-                <MenuItem value="active">Active</MenuItem>
-                <MenuItem value="inactive">Inactive</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-
-          {/* Stock Filter */}
-          <Grid item xs={12} md={2}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Stock Level</InputLabel>
-              <Select
-                value={selectedStock}
-                onChange={(e) => handleStockChange(e.target.value)}
-                label="Stock Level"
-              >
-                <MenuItem value="">All Stock Levels</MenuItem>
-                <MenuItem value="in-stock">In Stock</MenuItem>
-                <MenuItem value="low-stock">Low Stock (&lt;10)</MenuItem>
-                <MenuItem value="out-of-stock">Out of Stock</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-
-          {/* Sort By */}
-          <Grid item xs={12} md={2}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Sort By</InputLabel>
-              <Select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                label="Sort By"
-              >
-                <MenuItem value="">Default</MenuItem>
-                <MenuItem value="price">Price</MenuItem>
-                <MenuItem value="stock">Stock</MenuItem>
-                <MenuItem value="created_at">Date Created</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-
-          {/* Sort Order */}
-          {sortBy && (
-            <Grid item xs={12} md={2}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Order</InputLabel>
-                <Select
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value)}
-                  label="Order"
-                >
-                  <MenuItem value="asc">
-                    {sortBy === "created_at" ? "Oldest First" : "Low to High"}
-                  </MenuItem>
-                  <MenuItem value="desc">
-                    {sortBy === "created_at" ? "Newest First" : "High to Low"}
-                  </MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          )}
+        )}
       </FilterPanel>
 
       <DataTable
@@ -624,6 +752,216 @@ const AdminProductsPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Import CSV Modal */}
+      <Dialog
+        open={importModalOpen}
+        onClose={handleCloseImportModal}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Import Products from CSV</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            Upload a CSV file to import products in bulk. The file should
+            include columns for: name, price, category, slug, sku, ean,
+            description, stock, etc.
+          </DialogContentText>
+
+          <Box sx={{ mt: 2 }}>
+            <input
+              accept=".csv"
+              style={{ display: "none" }}
+              id="csv-file-input"
+              type="file"
+              onChange={handleFileChange}
+            />
+            <label htmlFor="csv-file-input">
+              <Button
+                variant="outlined"
+                component="span"
+                fullWidth
+                disabled={importing}
+              >
+                {importFile ? importFile.name : "Select CSV File"}
+              </Button>
+            </label>
+          </Box>
+
+          {importResult && (
+            <Box sx={{ mt: 3 }}>
+              <Alert
+                severity={importResult.failed > 0 ? "warning" : "success"}
+                sx={{ mb: 2 }}
+              >
+                {importResult.message}
+              </Alert>
+
+              <Box
+                sx={{ p: 2, bgcolor: "background.default", borderRadius: 1 }}
+              >
+                <Typography variant="body2" gutterBottom>
+                  <strong>Total rows:</strong> {importResult.total_rows}
+                </Typography>
+                <Typography variant="body2" gutterBottom color="success.main">
+                  <strong>Successful:</strong> {importResult.successful}
+                </Typography>
+                <Typography variant="body2" gutterBottom color="error.main">
+                  <strong>Failed:</strong> {importResult.failed}
+                </Typography>
+
+                {importResult.errors && importResult.errors.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                      Errors:
+                    </Typography>
+                    <Box sx={{ maxHeight: 200, overflow: "auto" }}>
+                      {importResult.errors.slice(0, 10).map((error, index) => (
+                        <Typography
+                          key={index}
+                          variant="caption"
+                          display="block"
+                          color="error"
+                          sx={{ mb: 0.5 }}
+                        >
+                          {error}
+                        </Typography>
+                      ))}
+                      {importResult.errors.length > 10 && (
+                        <Typography variant="caption" color="text.secondary">
+                          ... and {importResult.errors.length - 10} more errors
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseImportModal} disabled={importing}>
+            {importResult ? "Close" : "Cancel"}
+          </Button>
+          {!importResult && (
+            <Button
+              onClick={handleImport}
+              color="primary"
+              variant="contained"
+              disabled={!importFile || importing}
+            >
+              {importing ? "Importing..." : "Import"}
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete All Products Dialog */}
+      <Dialog
+        open={deleteAllDialogOpen}
+        onClose={handleCloseDeleteAllDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ color: "error.main", display: "flex", alignItems: "center", gap: 1 }}>
+          <WarningIcon /> Delete All Products
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            <strong>DANGER:</strong> This action will permanently delete ALL products from the database. This cannot be undone!
+          </Alert>
+          <DialogContentText sx={{ mb: 2 }}>
+            You are about to delete <strong>{totalProducts} products</strong>. This will remove all product data including images, descriptions, inventory, and associations.
+          </DialogContentText>
+          <DialogContentText sx={{ mb: 2 }}>
+            To confirm, type <strong>DELETE ALL PRODUCTS</strong> in the box below:
+          </DialogContentText>
+          <TextField
+            fullWidth
+            variant="outlined"
+            value={deleteAllConfirmText}
+            onChange={(e) => setDeleteAllConfirmText(e.target.value)}
+            placeholder="DELETE ALL PRODUCTS"
+            autoFocus
+            disabled={deletingAll}
+            error={deleteAllConfirmText !== "" && deleteAllConfirmText !== "DELETE ALL PRODUCTS"}
+            helperText={deleteAllConfirmText !== "" && deleteAllConfirmText !== "DELETE ALL PRODUCTS" ? "Text must match exactly" : ""}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteAllDialog} disabled={deletingAll}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteAllConfirm}
+            color="error"
+            variant="contained"
+            disabled={deleteAllConfirmText !== "DELETE ALL PRODUCTS" || deletingAll}
+          >
+            {deletingAll ? "Deleting..." : "Delete All Products"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Danger Zone */}
+      <Box sx={{ mt: 6 }}>
+        <Accordion
+          sx={{
+            border: "2px solid",
+            borderColor: "error.main",
+            "&:before": { display: "none" },
+          }}
+        >
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            sx={{
+              bgcolor: "error.main",
+              color: "error.contrastText",
+              "&:hover": { bgcolor: "error.dark" },
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <WarningIcon />
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Danger Zone
+              </Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 3 }}>
+            <Alert severity="error" sx={{ mb: 3 }}>
+              The actions in this section are destructive and cannot be undone. Proceed with extreme caution.
+            </Alert>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                p: 2,
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 1,
+              }}
+            >
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  Delete All Products
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Permanently delete all {totalProducts} products from the database
+                </Typography>
+              </Box>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleOpenDeleteAllDialog}
+                disabled={totalProducts === 0}
+              >
+                Delete All
+              </Button>
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
     </Container>
   );
 };

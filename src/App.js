@@ -34,6 +34,7 @@ import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminEditOrderPage from "./pages/admin/AdminEditOrderPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminEditProductPage from "./pages/admin/AdminEditProductPage";
+import AddProductPage from "./pages/admin/AddProductPage";
 import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
 import AdminBrandsPage from "./pages/admin/AdminBrandsPage";
 
@@ -171,6 +172,14 @@ const AppContent = () => {
                   element={
                     <AdminRoute>
                       <AdminProductsPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/products/add"
+                  element={
+                    <AdminRoute>
+                      <AddProductPage />
                     </AdminRoute>
                   }
                 />
