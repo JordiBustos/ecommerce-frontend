@@ -16,6 +16,7 @@ import {
 import { useSnackbar } from "notistack";
 import { useStore } from "../contexts/StoreContext";
 import orderService from "../services/orderService";
+import { BankingInformation } from "../components";
 
 /**
  * Order confirmation page with payment instructions
@@ -139,118 +140,7 @@ const OrderConfirmationPage = () => {
               To continue with the payment, you can make a bank transfer:
             </Typography>
 
-            <Box sx={{ bgcolor: "grey.50", p: 3, borderRadius: 2, mb: 2 }}>
-              {storeSettings?.bank_name && (
-                <Typography variant="body1" paragraph>
-                  <strong>Bank:</strong> {storeSettings.bank_name}
-                </Typography>
-              )}
-
-              {storeSettings?.account_type && (
-                <Typography variant="body1" paragraph>
-                  <strong>Account Type:</strong> {storeSettings.account_type}
-                </Typography>
-              )}
-
-              {storeSettings?.cvu && (
-                <Typography variant="body1" paragraph>
-                  <strong>CVU:</strong>{" "}
-                  <strong
-                    style={{
-                      fontSize: "1.1em",
-                      color: storeSettings.primary_color || "#8B0000",
-                    }}
-                  >
-                    {storeSettings.cvu}
-                  </strong>
-                </Typography>
-              )}
-
-              {storeSettings?.cbu && (
-                <Typography variant="body1" paragraph>
-                  <strong>CBU:</strong>{" "}
-                  <strong
-                    style={{
-                      fontSize: "1.1em",
-                      color: storeSettings.primary_color || "#8B0000",
-                    }}
-                  >
-                    {storeSettings.cbu}
-                  </strong>
-                </Typography>
-              )}
-
-              {storeSettings?.alias && (
-                <Typography variant="body1" paragraph>
-                  <strong>Alias:</strong>{" "}
-                  <strong
-                    style={{
-                      fontSize: "1.1em",
-                      color: storeSettings.primary_color || "#8B0000",
-                    }}
-                  >
-                    {storeSettings.alias}
-                  </strong>
-                </Typography>
-              )}
-
-              {storeSettings?.account_number && (
-                <Typography variant="body1" paragraph sx={{ mb: 0 }}>
-                  <strong>Account Number:</strong>{" "}
-                  {storeSettings.account_number}
-                </Typography>
-              )}
-            </Box>
-
-            {storeSettings?.payment_instructions && (
-              <Typography variant="body2" color="text.secondary" paragraph>
-                {storeSettings.payment_instructions}
-              </Typography>
-            )}
-
-            <Box
-              sx={{
-                bgcolor: storeSettings?.primary_color || "warning.light",
-                p: 2,
-                borderRadius: 1,
-                border: "1px solid",
-                borderColor: storeSettings?.primary_color || "warning.main",
-                mt: 3,
-              }}
-            >
-              <Typography variant="body2" sx={{ color: "#fff" }}>
-                <strong>Important:</strong> When making the transfer, you must
-                share the receipt{" "}
-                {storeSettings?.phone ? (
-                  <>
-                    to our WhatsApp:{" "}
-                    <a
-                      href={`https://wa.me/${storeSettings.phone.replace(
-                        /\D/g,
-                        ""
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: "#fff", textDecoration: "underline" }}
-                    >
-                      {storeSettings.phone}
-                    </a>
-                  </>
-                ) : storeSettings?.email ? (
-                  <>
-                    via email:{" "}
-                    <a
-                      href={`mailto:${storeSettings.email}`}
-                      style={{ color: "#fff", textDecoration: "underline" }}
-                    >
-                      {storeSettings.email}
-                    </a>
-                  </>
-                ) : (
-                  "to us"
-                )}
-              </Typography>
-            </Box>
+            <BankingInformation storeSettings={storeSettings} showInstructions />
           </Box>
 
           {/* Order reference */}

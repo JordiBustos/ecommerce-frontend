@@ -11,4 +11,5 @@ export { default as Footer } from './Footer';
 export { default as FilterPanel } from './FilterPanel';
 export { default as StatusChip } from './StatusChip';
 export { default as PageHeader } from './PageHeader';
+export { default as BankingInformation } from './BankingInformation';
 

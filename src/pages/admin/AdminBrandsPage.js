@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Typography,
@@ -42,11 +42,7 @@ const AdminBrandsPage = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    loadBrands();
-  }, []);
-
-  const loadBrands = async () => {
+  const loadBrands = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -59,7 +55,11 @@ const AdminBrandsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [enqueueSnackbar]);
+
+  useEffect(() => {
+    loadBrands();
+  }, [loadBrands]);
 
   const handleOpenDialog = (brand = null) => {
     if (brand) {

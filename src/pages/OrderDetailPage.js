@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import {
+  Alert,
   Container,
   Typography,
   Box,
@@ -36,6 +37,8 @@ import { useSnackbar } from "notistack";
 import orderService from "../services/orderService";
 import productService from "../services/productService";
 import config from "../config";
+import { useStore } from "../contexts/StoreContext";
+import { BankingInformation } from "../components";
 
 /**
  * Order detail page component
@@ -45,6 +48,7 @@ const OrderDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
+  const { storeSettings } = useStore();
   const [order, setOrder] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,19 +64,24 @@ const OrderDetailPage = () => {
       setLoading(true);
       const data = await orderService.getOrder(orderId);
       setOrder(data);
-      
+
       // Fetch product details for each item
       if (data.items && data.items.length > 0) {
         const itemsWithProducts = await Promise.all(
           data.items.map(async (item) => {
             try {
-              const product = await productService.getProductById(item.product_id);
+              const product = await productService.getProductById(
+                item.product_id
+              );
               return {
                 ...item,
                 product: product,
               };
             } catch (error) {
-              console.error(`Failed to load product ${item.product_id}:`, error);
+              console.error(
+                `Failed to load product ${item.product_id}:`,
+                error
+              );
               return {
                 ...item,
                 product: null,
@@ -189,7 +198,7 @@ const OrderDetailPage = () => {
           startIcon={<ArrowBackIcon />}
           onClick={() => {
             const from = location.state?.from;
-            navigate(from === 'admin' ? '/admin/orders' : '/orders');
+            navigate(from === "admin" ? "/admin/orders" : "/orders");
           }}
           sx={{ mb: 2 }}
         >
@@ -281,19 +290,8 @@ const OrderDetailPage = () => {
                       Delivery Address
                     </Typography>
                     <Typography variant="body2">
-                      {order.address?.address_line1 || "No address specified"}
+                      {order.shipping_address || "No address specified"}
                     </Typography>
-                    {order.address?.address_line2 && (
-                      <Typography variant="body2">
-                        {order.address.address_line2}
-                      </Typography>
-                    )}
-                    {order.address && (
-                      <Typography variant="body2">
-                        {order.address.city}, {order.address.province}{" "}
-                        {order.address.postal_code}
-                      </Typography>
-                    )}
                   </Box>
                   {order.received_by && (
                     <Box>
@@ -318,7 +316,7 @@ const OrderDetailPage = () => {
                     <Typography variant="h6">Payment Method</Typography>
                   </Box>
                   <Typography variant="body1" sx={{ fontWeight: 500, mb: 3 }}>
-                    {order.payment_method || "Not specified"}
+                    Bank Transfer
                   </Typography>
 
                   <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
@@ -332,7 +330,9 @@ const OrderDetailPage = () => {
                   {order.receipts && order.receipts.length > 0 && (
                     <>
                       <Divider sx={{ my: 2 }} />
-                      <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", mb: 1 }}
+                      >
                         <ReceiptIcon sx={{ mr: 1, color: "success.main" }} />
                         <Typography variant="h6">
                           Receipts ({order.receipts.length})
@@ -353,6 +353,37 @@ const OrderDetailPage = () => {
               </Card>
             </Grid>
           </Grid>
+
+          {/* Banking Information - Only show for pending/processing orders */}
+          {(order.status === "pending" || order.status === "processing") && (
+            <Card elevation={2} sx={{ mb: 3 }}>
+              <CardContent>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <PaymentIcon sx={{ mr: 1, color: "primary.main" }} />
+                  <Typography variant="h6">
+                    Bank Transfer Information
+                  </Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  You can complete your payment by making a bank transfer to the
+                  following account:
+                </Typography>
+                <BankingInformation storeSettings={storeSettings} compact />
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  <Typography variant="body2">
+                    After making the transfer, please upload the receipt in the{" "}
+                    <strong
+                      onClick={() => setActiveTab(1)}
+                      style={{ cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      Upload Receipt
+                    </strong>{" "}
+                    tab to speed up order processing.
+                  </Typography>
+                </Alert>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Products Table */}
           <Paper elevation={2} sx={{ mb: 3 }}>
@@ -393,7 +424,11 @@ const OrderDetailPage = () => {
                           {item.product?.name || "Unknown Product"}
                         </Typography>
                         {item.product?.description && (
-                          <Typography variant="caption" color="text.secondary" display="block">
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            display="block"
+                          >
                             {item.product.description.substring(0, 60)}
                             {item.product.description.length > 60 ? "..." : ""}
                           </Typography>

@@ -6,7 +6,6 @@
 
 - [ ] **Add Product Page**: Crear página completa para agregar productos desde el admin
 - [ ] **Add Order (Admin)**: Permitir a admins crear órdenes manualmente para usuarios
-- [ ] **Datos bancarios en orden**: Agregar información de transferencia bancaria en la vista de orden individual
 - [ ] **Admin navigation**: Reemplazar botones de admin en navbar por una navegación dedicada/sidebar
 - [ ] **Cart Admin View**: Corregir y mejorar la vista de administración de todos los carritos
 

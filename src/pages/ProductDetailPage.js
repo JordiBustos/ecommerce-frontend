@@ -111,14 +111,20 @@ const ProductDetailPage = () => {
    */
   const buildCategoryPath = (categoryId) => {
     const path = [];
-    let currentId = categoryId;
+    const categoryMap = {};
+    
+    // Create a map for O(1) lookups
+    categories.forEach((cat) => {
+      categoryMap[cat.id] = cat;
+    });
 
-    while (currentId) {
-      const category = categories.find((cat) => cat.id === currentId);
+    let currentCategoryId = categoryId;
+    while (currentCategoryId) {
+      const category = categoryMap[currentCategoryId];
       if (!category) break;
 
       path.unshift(category); // Add to beginning of array
-      currentId = category.parent_id;
+      currentCategoryId = category.parent_id;
     }
 
     return path;

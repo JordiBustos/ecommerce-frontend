@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Container,
   Typography,
@@ -54,9 +54,24 @@ const AdminCategoriesPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState(new Set());
 
+  const loadCategories = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const data = await productService.getCategories();
+      setCategories(data);
+    } catch (err) {
+      const errorMsg = "Failed to load categories";
+      setError(errorMsg);
+      enqueueSnackbar(errorMsg, { variant: "error" });
+    } finally {
+      setLoading(false);
+    }
+  }, [enqueueSnackbar]);
+
   useEffect(() => {
     loadCategories();
-  }, []);
+  }, [loadCategories]);
 
   /**
    * Build hierarchical tree structure from flat categories array
@@ -86,21 +101,6 @@ const AdminCategoriesPage = () => {
       }
       return newSet;
     });
-  };
-
-  const loadCategories = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const data = await productService.getCategories();
-      setCategories(data);
-    } catch (err) {
-      const errorMsg = "Failed to load categories";
-      setError(errorMsg);
-      enqueueSnackbar(errorMsg, { variant: "error" });
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleOpenDialog = (category = null) => {
