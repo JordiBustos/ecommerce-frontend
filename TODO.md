@@ -46,6 +46,11 @@
 - [ ] **Historial de cambios de orden**: Log de modificaciones en estado de órdenes
 - [ ] **Cancelación de orden**: Permitir a usuarios cancelar órdenes pendientes
 
+### Sistema de roles
+
+- [ ] **Rol consumidor final**
+- [ ] **Rol mayorista**
+
 ## 🟢 Mejoras / Baja Prioridad
 
 ### Backend & Frontend Integration
@@ -138,4 +143,4 @@
 
 ---
 
-**Última actualización**: 15 de diciembre de 2025
+**Última actualización**: 16 de diciembre de 2025
