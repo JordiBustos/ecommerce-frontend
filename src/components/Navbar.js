@@ -120,6 +120,24 @@ const Navbar = () => {
                         </ListItemIcon>
                         <ListItemText>All Carts</ListItemText>
                       </MenuItem>
+                      <MenuItem
+                        onClick={() =>
+                          handleAdminNavigation("/admin/categories")
+                        }
+                      >
+                        <ListItemIcon>
+                          <InventoryIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Categories</ListItemText>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => handleAdminNavigation("/admin/brands")}
+                      >
+                        <ListItemIcon>
+                          <InventoryIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Brands</ListItemText>
+                      </MenuItem>
                     </Menu>
                   </>
                 )}
