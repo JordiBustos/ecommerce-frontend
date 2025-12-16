@@ -15,8 +15,9 @@ import ProductCard from './ProductCard';
  * @param {Object} props
  * @param {Array} props.products - Array of products to display
  * @param {Function} [props.onAddToCart] - Callback when add to cart is clicked
+ * @param {boolean} [props.compact=true] - Whether to use compact card layout
  */
-const ProductCarousel = ({ products, onAddToCart }) => {
+const ProductCarousel = ({ products, onAddToCart, compact = true }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   
   const itemsPerView = 4;
@@ -76,7 +77,7 @@ const ProductCarousel = ({ products, onAddToCart }) => {
             <ProductCard
               product={product}
               onAddToCart={onAddToCart}
-              compact
+              compact={compact}
             />
           </Box>
         ))}
@@ -114,6 +115,7 @@ ProductCarousel.propTypes = {
     })
   ).isRequired,
   onAddToCart: PropTypes.func,
+  compact: PropTypes.bool,
 };
 
 export default ProductCarousel;

@@ -97,6 +97,90 @@ const productService = {
     const response = await apiClient.delete(`/products/${productId}`);
     return response.data;
   },
+
+  // Category CRUD operations
+  /**
+   * Create a new category
+   * @param {Object} categoryData - Category data
+   * @returns {Promise<Object>} Created category
+   */
+  async createCategory(categoryData) {
+    const response = await apiClient.post("/products/categories", categoryData);
+    return response.data;
+  },
+
+  /**
+   * Get category by ID
+   * @param {number} categoryId - Category ID
+   * @returns {Promise<Object>} Category data
+   */
+  async getCategoryById(categoryId) {
+    const response = await apiClient.get(`/products/categories/${categoryId}`);
+    return response.data;
+  },
+
+  /**
+   * Update category by ID
+   * @param {number} categoryId - Category ID
+   * @param {Object} categoryData - Category data to update
+   * @returns {Promise<Object>} Updated category
+   */
+  async updateCategory(categoryId, categoryData) {
+    const response = await apiClient.put(`/products/categories/${categoryId}`, categoryData);
+    return response.data;
+  },
+
+  /**
+   * Delete category by ID
+   * @param {number} categoryId - Category ID
+   * @returns {Promise<void>}
+   */
+  async deleteCategory(categoryId) {
+    const response = await apiClient.delete(`/products/categories/${categoryId}`);
+    return response.data;
+  },
+
+  // Brand CRUD operations
+  /**
+   * Create a new brand
+   * @param {Object} brandData - Brand data
+   * @returns {Promise<Object>} Created brand
+   */
+  async createBrand(brandData) {
+    const response = await apiClient.post("/products/brands", brandData);
+    return response.data;
+  },
+
+  /**
+   * Get brand by ID
+   * @param {number} brandId - Brand ID
+   * @returns {Promise<Object>} Brand data
+   */
+  async getBrandById(brandId) {
+    const response = await apiClient.get(`/products/brands/${brandId}`);
+    return response.data;
+  },
+
+  /**
+   * Update brand by ID
+   * @param {number} brandId - Brand ID
+   * @param {Object} brandData - Brand data to update
+   * @returns {Promise<Object>} Updated brand
+   */
+  async updateBrand(brandId, brandData) {
+    const response = await apiClient.put(`/products/brands/${brandId}`, brandData);
+    return response.data;
+  },
+
+  /**
+   * Delete brand by ID
+   * @param {number} brandId - Brand ID
+   * @returns {Promise<void>}
+   */
+  async deleteBrand(brandId) {
+    const response = await apiClient.delete(`/products/brands/${brandId}`);
+    return response.data;
+  },
 };
 
 export default productService;

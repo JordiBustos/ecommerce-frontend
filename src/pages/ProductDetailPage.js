@@ -36,6 +36,8 @@ import productService from "../services/productService";
 import { useCart } from "../contexts/CartContext";
 import { useFavorites } from "../contexts/FavoritesContext";
 import { useAuth } from "../contexts/AuthContext";
+import ProductCarousel from "../components/ProductCarousel";
+import { useMemo } from "react";
 
 /**
  * Product detail page component
@@ -47,39 +49,86 @@ const ProductDetailPage = () => {
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isAuthenticated } = useAuth();
-  
   const [product, setProduct] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [isFav, setIsFav] = useState(false);
+  const [similarProducts, setSimilarProducts] = useState([]);
 
   useEffect(() => {
-    loadProduct();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId]);
-
-  useEffect(() => {
-    if (product && isAuthenticated) {
-      setIsFav(isFavorite(product.id));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product, isAuthenticated]);
-
-  /**
-   * Load product details
-   */
-  const loadProduct = async () => {
-    try {
+    const loadData = async () => {
       setLoading(true);
-      const data = await productService.getProductById(productId);
-      setProduct(data);
-    } catch (error) {
-      enqueueSnackbar("Failed to load product details", { variant: "error" });
-      navigate("/products");
-    } finally {
-      setLoading(false);
+      try {
+        const [productData, categoriesData] = await Promise.all([
+          productService.getProductById(productId),
+          productService.getCategories(),
+        ]);
+
+        setProduct(productData);
+        setCategories(categoriesData);
+      } catch (error) {
+        enqueueSnackbar("Failed to load product details", { variant: "error" });
+        navigate("/products");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [productId, navigate, enqueueSnackbar]);
+
+  const isFav = useMemo(() => {
+    if (!product || !isAuthenticated) return false;
+    return isFavorite(product.id);
+  }, [product, isAuthenticated, isFavorite]);
+
+  const categoryPath = useMemo(() => {
+    if (!product?.category_id || categories.length === 0) return [];
+
+    const path = [];
+    const categoryMap = new Map(categories.map((c) => [c.id, c]));
+
+    let currentId = product.category_id;
+    while (currentId) {
+      const category = categoryMap.get(currentId);
+      if (!category) break;
+      path.unshift(category);
+      currentId = category.parent_id;
     }
-  };
+    return path;
+  }, [product, categories]);
+
+  useEffect(() => {
+    if (!product || categoryPath.length === 0) return;
+
+    const fetchSimilar = async () => {
+      try {
+        const brandId = product.brand_id;
+
+        const categoryIds = categoryPath.map((cat) => cat.id);
+
+        const queryParams = {
+          limit: 12,
+          skip: 0,
+          brands_id: [brandId],
+          categories_id: categoryIds.join(","),
+        };
+
+
+        const data = await productService.getProducts(queryParams);
+
+        const filteredProducts = data.products.filter(
+          (p) => p.id !== product.id
+        );
+
+        setSimilarProducts(filteredProducts);
+      } catch (error) {
+        console.error("Failed to load similar products", error);
+      }
+    };
+
+    fetchSimilar();
+  }, [product, categoryPath]);
 
   /**
    * Handle quantity change
@@ -122,20 +171,10 @@ const ProductDetailPage = () => {
    * Handle toggle favorite
    */
   const handleToggleFavorite = async () => {
-    if (!isAuthenticated) {
-      enqueueSnackbar("Please log in to favorite products", {
-        variant: "info",
-      });
-      return;
-    }
-
+    if (!isAuthenticated) return; // Add your snackbar here
     try {
       await toggleFavorite(product.id);
-      setIsFav(!isFav);
-      enqueueSnackbar(
-        isFav ? "Removed from favorites" : "Added to favorites",
-        { variant: "success" }
-      );
+      enqueueSnackbar("Favorites updated", { variant: "success" });
     } catch (error) {
       enqueueSnackbar("Failed to update favorites", { variant: "error" });
     }
@@ -194,16 +233,17 @@ const ProductDetailPage = () => {
         >
           Products
         </MuiLink>
-        {product.category && (
+        {categoryPath.map((cat) => (
           <MuiLink
+            key={cat.id}
             component={Link}
-            to={`/products?category=${product.category.id}`}
+            to={`/products?category=${cat.id}`}
             underline="hover"
             color="inherit"
           >
-            {product.category.name}
+            {cat.name}
           </MuiLink>
-        )}
+        ))}
         <Typography color="text.primary">{product.name}</Typography>
       </Breadcrumbs>
 
@@ -231,7 +271,7 @@ const ProductDetailPage = () => {
                 borderRadius: 2,
               }}
             />
-            
+
             {/* Stock Badge */}
             <Chip
               icon={isInStock ? <VerifiedIcon /> : <InventoryIcon />}
@@ -316,7 +356,11 @@ const ProductDetailPage = () => {
             {/* Quantity Selector */}
             {isInStock && (
               <Box sx={{ mb: 3 }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
                   Quantity:
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -329,7 +373,10 @@ const ProductDetailPage = () => {
                       borderRadius: 2,
                     }}
                   >
-                    <IconButton onClick={handleDecrement} disabled={quantity <= 1}>
+                    <IconButton
+                      onClick={handleDecrement}
+                      disabled={quantity <= 1}
+                    >
                       <RemoveIcon />
                     </IconButton>
                     <Typography
@@ -399,7 +446,9 @@ const ProductDetailPage = () => {
                   {/* SKU */}
                   {product.sku && (
                     <Grid item xs={12}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <QrCodeIcon sx={{ color: "text.secondary" }} />
                         <Typography variant="body2" color="text.secondary">
                           SKU:
@@ -414,7 +463,9 @@ const ProductDetailPage = () => {
                   {/* EAN */}
                   {product.ean && (
                     <Grid item xs={12}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <QrCodeIcon sx={{ color: "text.secondary" }} />
                         <Typography variant="body2" color="text.secondary">
                           EAN:
@@ -429,7 +480,9 @@ const ProductDetailPage = () => {
                   {/* Weight */}
                   {product.weight && (
                     <Grid item xs={12}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <ScaleIcon sx={{ color: "text.secondary" }} />
                         <Typography variant="body2" color="text.secondary">
                           Weight:
@@ -444,7 +497,9 @@ const ProductDetailPage = () => {
                   {/* Units per Package */}
                   {product.units_per_package && (
                     <Grid item xs={12}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <InventoryIcon sx={{ color: "text.secondary" }} />
                         <Typography variant="body2" color="text.secondary">
                           Units per Package:
@@ -459,7 +514,9 @@ const ProductDetailPage = () => {
                   {/* Category */}
                   {product.category && (
                     <Grid item xs={12}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <CategoryIcon sx={{ color: "text.secondary" }} />
                         <Typography variant="body2" color="text.secondary">
                           Category:
@@ -496,7 +553,14 @@ const ProductDetailPage = () => {
             {product.brand && product.brand.description && (
               <Card variant="outlined" sx={{ borderRadius: 2, mt: 3 }}>
                 <CardContent>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      mb: 2,
+                    }}
+                  >
                     {product.brand.logo_url && (
                       <Box
                         component="img"
@@ -525,6 +589,19 @@ const ProductDetailPage = () => {
           </Box>
         </Grid>
       </Grid>
+
+      {/* Similar Products */}
+      {similarProducts.length > 0 && (
+        <Box sx={{ mt: 8 }}>
+          <Typography
+            variant="h5"
+            sx={{ mb: 3, fontWeight: 600, color: "text.primary" }}
+          >
+            Similar Products
+          </Typography>
+          <ProductCarousel products={similarProducts} compact={false} />
+        </Box>
+      )}
     </Container>
   );
 };
