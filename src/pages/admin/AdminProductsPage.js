@@ -54,6 +54,10 @@ const AdminProductsPage = () => {
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedStatus, setSelectedStatus] = useState(""); // all, active, inactive
   const [selectedStock, setSelectedStock] = useState(""); // all, in-stock, low-stock, out-of-stock
+  
+  // Sorting states
+  const [sortBy, setSortBy] = useState(""); // price, stock, created_at
+  const [sortOrder, setSortOrder] = useState("desc"); // asc, desc
 
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -152,7 +156,7 @@ const AdminProductsPage = () => {
   const filteredProducts = useMemo(() => {
     if (!products) return [];
 
-    return products.filter((product) => {
+    let filtered = products.filter((product) => {
       // Status filter (client-side only)
       if (selectedStatus === "active" && !product.is_active) return false;
       if (selectedStatus === "inactive" && product.is_active) return false;
@@ -168,7 +172,39 @@ const AdminProductsPage = () => {
 
       return true;
     });
-  }, [products, selectedStatus, selectedStock]);
+
+    // Apply sorting
+    if (sortBy) {
+      filtered = [...filtered].sort((a, b) => {
+        let aValue, bValue;
+
+        switch (sortBy) {
+          case "price":
+            aValue = a.price || 0;
+            bValue = b.price || 0;
+            break;
+          case "stock":
+            aValue = a.stock || 0;
+            bValue = b.stock || 0;
+            break;
+          case "created_at":
+            aValue = new Date(a.created_at || 0).getTime();
+            bValue = new Date(b.created_at || 0).getTime();
+            break;
+          default:
+            return 0;
+        }
+
+        if (sortOrder === "asc") {
+          return aValue - bValue;
+        } else {
+          return bValue - aValue;
+        }
+      });
+    }
+
+    return filtered;
+  }, [products, selectedStatus, selectedStock, sortBy, sortOrder]);
 
   const columns = [
     {
@@ -183,7 +219,6 @@ const AdminProductsPage = () => {
     {
       field: "category",
       header: "Category",
-      sortable: true,
       render: (row) => (
         <Chip
           label={row.category?.name || row.category || "Uncategorized"}
@@ -291,6 +326,8 @@ const AdminProductsPage = () => {
     setSelectedBrand("");
     setSelectedStatus("");
     setSelectedStock("");
+    setSortBy("");
+    setSortOrder("desc");
     setPage(1);
   };
 
@@ -331,12 +368,14 @@ const AdminProductsPage = () => {
     setPage(newPage);
   };
 
-  const hasActiveFilters =
+  const hasActiveFilters = Boolean(
     searchQuery ||
     selectedCategory ||
     selectedBrand ||
     selectedStatus ||
-    selectedStock;
+    selectedStock ||
+    sortBy
+  );
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -470,7 +509,7 @@ const AdminProductsPage = () => {
           </Grid>
 
           {/* Stock Filter */}
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={2}>
             <FormControl fullWidth size="small">
               <InputLabel>Stock Level</InputLabel>
               <Select
@@ -485,6 +524,44 @@ const AdminProductsPage = () => {
               </Select>
             </FormControl>
           </Grid>
+
+          {/* Sort By */}
+          <Grid item xs={12} md={2}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Sort By</InputLabel>
+              <Select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                label="Sort By"
+              >
+                <MenuItem value="">Default</MenuItem>
+                <MenuItem value="price">Price</MenuItem>
+                <MenuItem value="stock">Stock</MenuItem>
+                <MenuItem value="created_at">Date Created</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          {/* Sort Order */}
+          {sortBy && (
+            <Grid item xs={12} md={2}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Order</InputLabel>
+                <Select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                  label="Order"
+                >
+                  <MenuItem value="asc">
+                    {sortBy === "created_at" ? "Oldest First" : "Low to High"}
+                  </MenuItem>
+                  <MenuItem value="desc">
+                    {sortBy === "created_at" ? "Newest First" : "High to Low"}
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          )}
       </FilterPanel>
 
       <DataTable
