@@ -58,6 +58,7 @@ const AdminEditOrderPage = () => {
       shipping_address: "",
       replacement_criterion: "",
       comment: "",
+      estimated_delivery_date: "",
     },
     handleSaveOrder,
     validateForm
@@ -83,6 +84,9 @@ const AdminEditOrderPage = () => {
         shipping_address: orderData.shipping_address || "",
         replacement_criterion: orderData.replacement_criterion || "",
         comment: orderData.comment || "",
+        estimated_delivery_date: orderData.estimated_delivery_date
+          ? orderData.estimated_delivery_date.split("T")[0]
+          : "",
       });
 
       // Fetch product details for each order item
@@ -134,8 +138,7 @@ const AdminEditOrderPage = () => {
         status: formValues.status,
         shipping_address: formValues.shipping_address || null,
         replacement_criterion: formValues.replacement_criterion || null,
-        comment: formValues.comment || null,
-      };
+        comment: formValues.comment || null,        estimated_delivery_date: formValues.estimated_delivery_date || null,      };
 
       await orderService.updateOrder(orderId, updateData);
       enqueueSnackbar("Order updated successfully", { variant: "success" });
@@ -285,6 +288,22 @@ const AdminEditOrderPage = () => {
                     value={values.comment}
                     onChange={handleChange}
                     helperText="Comment from customer to admin (provided during checkout)"
+                  />
+                </Grid>
+
+                {/* Estimated Delivery Date */}
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    label="Estimated Delivery Date"
+                    name="estimated_delivery_date"
+                    value={values.estimated_delivery_date}
+                    onChange={handleChange}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    helperText="Expected delivery date for this order"
                   />
                 </Grid>
 

@@ -257,6 +257,16 @@ const OrderDetailPage = () => {
                   </Box>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
+                      Estimated Delivery Date
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {order.estimated_delivery_date
+                        ? formatDate(order.estimated_delivery_date)
+                        : "Not specified"}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
                       Delivery Date
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 500 }}>
