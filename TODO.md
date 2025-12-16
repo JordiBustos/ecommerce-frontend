@@ -9,6 +9,7 @@
 - [ ] **Cart Admin View**: Corregir y mejorar la vista de administración de todos los carritos
 - [ ] **Categorías en dropdown**: Corregir jerarquía
 - [ ] **Agregar field delivery date a orden**: Permitir al admin setear delivery date en la orden del usuario.
+- [ ] **Barra de navegación responsive**: Agregar favoritos, ordenes y mi cuenta en un dropdown para que entre la navbar en mobile.
 
 ### User Experience
 
