@@ -36,6 +36,8 @@ import productService from "../services/productService";
 import { useCart } from "../contexts/CartContext";
 import { useFavorites } from "../contexts/FavoritesContext";
 import { useAuth } from "../contexts/AuthContext";
+import ProductCarousel from "../components/ProductCarousel";
+import { useMemo } from "react";
 
 /**
  * Product detail page component
@@ -47,88 +49,86 @@ const ProductDetailPage = () => {
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isAuthenticated } = useAuth();
-
   const [product, setProduct] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [isFav, setIsFav] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [categoryPath, setCategoryPath] = useState([]);
+  const [similarProducts, setSimilarProducts] = useState([]);
 
   useEffect(() => {
-    loadProduct();
-    loadCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId]);
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [productData, categoriesData] = await Promise.all([
+          productService.getProductById(productId),
+          productService.getCategories(),
+        ]);
 
-  useEffect(() => {
-    if (product && isAuthenticated) {
-      setIsFav(isFavorite(product.id));
+        setProduct(productData);
+        setCategories(categoriesData);
+      } catch (error) {
+        enqueueSnackbar("Failed to load product details", { variant: "error" });
+        navigate("/products");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [productId, navigate, enqueueSnackbar]);
+
+  const isFav = useMemo(() => {
+    if (!product || !isAuthenticated) return false;
+    return isFavorite(product.id);
+  }, [product, isAuthenticated, isFavorite]);
+
+  const categoryPath = useMemo(() => {
+    if (!product?.category_id || categories.length === 0) return [];
+
+    const path = [];
+    const categoryMap = new Map(categories.map((c) => [c.id, c]));
+
+    let currentId = product.category_id;
+    while (currentId) {
+      const category = categoryMap.get(currentId);
+      if (!category) break;
+      path.unshift(category);
+      currentId = category.parent_id;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product, isAuthenticated]);
-
-  useEffect(() => {
-    if (product?.category_id && categories.length > 0) {
-      const path = buildCategoryPath(product.category_id);
-      setCategoryPath(path);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return path;
   }, [product, categories]);
 
-  /**
-   * Load product details
-   */
-  const loadProduct = async () => {
-    try {
-      setLoading(true);
-      const data = await productService.getProductById(productId);
-      setProduct(data);
-    } catch (error) {
-      enqueueSnackbar("Failed to load product details", { variant: "error" });
-      navigate("/products");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    if (!product || categoryPath.length === 0) return;
 
-  /**
-   * Load all categories
-   */
-  const loadCategories = async () => {
-    try {
-      const data = await productService.getCategories();
-      setCategories(data);
-    } catch (error) {
-      console.error("Failed to load categories", error);
-    }
-  };
+    const fetchSimilar = async () => {
+      try {
+        const brandId = product.brand_id;
 
-  /**
-   * Build category path from leaf to root
-   * @param {number} categoryId - Starting category ID
-   * @returns {Array} Array of categories from root to leaf
-   */
-  const buildCategoryPath = (categoryId) => {
-    const path = [];
-    const categoryMap = {};
-    
-    // Create a map for O(1) lookups
-    categories.forEach((cat) => {
-      categoryMap[cat.id] = cat;
-    });
+        const categoryIds = categoryPath.map((cat) => cat.id);
 
-    let currentCategoryId = categoryId;
-    while (currentCategoryId) {
-      const category = categoryMap[currentCategoryId];
-      if (!category) break;
+        const queryParams = {
+          limit: 12,
+          skip: 0,
+          brands_id: [brandId],
+          categories_id: categoryIds.join(","),
+        };
 
-      path.unshift(category); // Add to beginning of array
-      currentCategoryId = category.parent_id;
-    }
 
-    return path;
-  };
+        const data = await productService.getProducts(queryParams);
+
+        const filteredProducts = data.products.filter(
+          (p) => p.id !== product.id
+        );
+
+        setSimilarProducts(filteredProducts);
+      } catch (error) {
+        console.error("Failed to load similar products", error);
+      }
+    };
+
+    fetchSimilar();
+  }, [product, categoryPath]);
 
   /**
    * Handle quantity change
@@ -171,19 +171,10 @@ const ProductDetailPage = () => {
    * Handle toggle favorite
    */
   const handleToggleFavorite = async () => {
-    if (!isAuthenticated) {
-      enqueueSnackbar("Please log in to favorite products", {
-        variant: "info",
-      });
-      return;
-    }
-
+    if (!isAuthenticated) return; // Add your snackbar here
     try {
       await toggleFavorite(product.id);
-      setIsFav(!isFav);
-      enqueueSnackbar(isFav ? "Removed from favorites" : "Added to favorites", {
-        variant: "success",
-      });
+      enqueueSnackbar("Favorites updated", { variant: "success" });
     } catch (error) {
       enqueueSnackbar("Failed to update favorites", { variant: "error" });
     }
@@ -598,6 +589,19 @@ const ProductDetailPage = () => {
           </Box>
         </Grid>
       </Grid>
+
+      {/* Similar Products */}
+      {similarProducts.length > 0 && (
+        <Box sx={{ mt: 8 }}>
+          <Typography
+            variant="h5"
+            sx={{ mb: 3, fontWeight: 600, color: "text.primary" }}
+          >
+            Similar Products
+          </Typography>
+          <ProductCarousel products={similarProducts} compact={false} />
+        </Box>
+      )}
     </Container>
   );
 };

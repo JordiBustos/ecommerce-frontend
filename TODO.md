@@ -20,7 +20,8 @@
 ### Catálogo y Productos
 
 - [ ] **Filtro de categorías jerárquico**: Permitir drill-down por categorías con hijos (revisar funcionamiento)
-- [ ] **Productos similares**: Vista de productos relacionados en página de detalle
+- [ ] **Productos similares**: Vista de productos relacionados en cart
+- [ ] **Filtro de categorías**: Cuando está seteado por URL no se puede filtrar.
 - [ ] **Comparador de productos**: Permitir comparar múltiples productos lado a lado
 - [ ] **Wishlist/Favorites mejorado**: Agregar notas o prioridades a favoritos
 - [ ] **Recently viewed**: Historial de productos vistos recientemente
@@ -117,7 +118,7 @@
 
 ## 🐛 Bugs & Fixes Conocidos
 
-- [] **ProductsPage**: Revisar filtrado de categorías
+- [ ] **ProductsPage**: Revisar filtrado de categorías
 - [ ] **Sorting en tablas paginadas**: El sorting actual solo ordena la página visible, no todas
 
 ## 📝 Notas de Implementación
