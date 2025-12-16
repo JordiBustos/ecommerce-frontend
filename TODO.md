@@ -8,6 +8,7 @@
 - [ ] **Admin navigation**: Reemplazar botones de admin en navbar por una navegación dedicada/sidebar
 - [ ] **Cart Admin View**: Corregir y mejorar la vista de administración de todos los carritos
 - [ ] **Categorías en dropdown**: Corregir jerarquía
+- [ ] **Agregar field delivery date a orden**: Permitir al admin setear delivery date en la orden del usuario.
 
 ### User Experience
 
