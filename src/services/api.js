@@ -133,9 +133,11 @@ apiClient.interceptors.response.use(
               variant: "warning",
             });
           }
-          setTimeout(() => {
-            window.location.href = "/login";
-          }, 1000);
+          if (window.location.pathname !== "/login") {
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 1000);
+          }
           return Promise.reject(refreshError);
         }
       } else {
@@ -145,9 +147,11 @@ apiClient.interceptors.response.use(
             variant: "info",
           });
         }
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 1000);
+        if (window.location.pathname !== "/login") {
+           setTimeout(() => {
+             window.location.href = "/login";
+           }, 1000);
+        }
         return Promise.reject(error);
       }
     }
