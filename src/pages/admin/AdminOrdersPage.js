@@ -12,8 +12,10 @@ import {
   Select,
   Grid,
   Pagination,
+  Button,
+  ButtonGroup,
 } from "@mui/material";
-import { ReceiptOutlined, Edit as EditIcon } from "@mui/icons-material";
+import { ReceiptOutlined, Edit as EditIcon, AttachMoney } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import {
@@ -40,12 +42,81 @@ const AdminOrdersPage = () => {
   const [page, setPage] = useState(1);
   const [itemsPerPage] = useState(20);
   const [totalOrders, setTotalOrders] = useState(0);
+  const [periodTotal, setPeriodTotal] = useState(0);
 
   // Filter states
   const [searchUserId, setSearchUserId] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [minAmount, setMinAmount] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedDateRange, setSelectedDateRange] = useState("all");
+
+  /**
+   * Get today's date in ISO 8601 format
+   */
+  const getToday = useCallback(() => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date.toISOString().split("T")[0];
+  }, []);
+
+  /**
+   * Get start of week in ISO 8601 format (Monday)
+   */
+  const getWeekStart = useCallback(() => {
+    const date = new Date();
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    const startOfWeek = new Date(date.setDate(diff));
+    startOfWeek.setHours(0, 0, 0, 0);
+    return startOfWeek.toISOString().split("T")[0];
+  }, []);
+
+  /**
+   * Get start of month in ISO 8601 format
+   */
+  const getMonthStart = useCallback(() => {
+    const date = new Date();
+    const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    return startOfMonth.toISOString().split("T")[0];
+  }, []);
+
+  /**
+   * Handle date range preset button click
+   */
+  const handleDateRangePreset = useCallback((range) => {
+    setSelectedDateRange(range);
+    const today = getToday();
+    const now = new Date();
+    const tomorrowISO = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
+
+    switch (range) {
+      case "today":
+        setStartDate(today);
+        setEndDate(tomorrowISO);
+        break;
+      case "week":
+        setStartDate(getWeekStart());
+        setEndDate(tomorrowISO);
+        break;
+      case "month":
+        setStartDate(getMonthStart());
+        setEndDate(tomorrowISO);
+        break;
+      case "all":
+        setStartDate("");
+        setEndDate("");
+        break;
+      default:
+        break;
+    }
+    setPage(1);
+  }, [getToday, getWeekStart, getMonthStart]);
 
   /**
    * Load orders with pagination and filters
@@ -61,18 +132,29 @@ const AdminOrdersPage = () => {
         limit: itemsPerPage,
       };
 
+      // Add date range parameters if set
+      if (startDate) {
+        params.start_date = startDate;
+      }
+      if (endDate) {
+        params.end_date = endDate;
+      }
+
       const response = await apiClient.get("/orders/all/admin", { params });
       const data = response.data;
 
       let ordersData = [];
       let total = 0;
+      let pTotal = 0;
 
       if (Array.isArray(data)) {
         ordersData = data;
         total = data.length;
+        pTotal = 0;
       } else if (data.orders) {
         ordersData = data.orders;
         total = data.total || data.orders.length;
+        pTotal = data.period_total || 0;
       }
 
       if (Array.isArray(ordersData)) {
@@ -85,6 +167,7 @@ const AdminOrdersPage = () => {
 
       setOrders(ordersData);
       setTotalOrders(total);
+      setPeriodTotal(pTotal);
     } catch (err) {
       const errorMsg = "Failed to load orders";
       setError(errorMsg);
@@ -92,7 +175,7 @@ const AdminOrdersPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, itemsPerPage, enqueueSnackbar]);
+  }, [page, itemsPerPage, startDate, endDate, enqueueSnackbar]);
 
   /**
    * Load orders when page changes
@@ -127,6 +210,10 @@ const AdminOrdersPage = () => {
     setSelectedStatus("");
     setMinAmount("");
     setMaxAmount("");
+    setStartDate("");
+    setEndDate("");
+    setSelectedDateRange("all");
+    setPeriodTotal(0);
     setPage(1);
   };
 
@@ -139,7 +226,7 @@ const AdminOrdersPage = () => {
   const totalPages = Math.ceil(totalOrders / itemsPerPage);
 
   const hasActiveFilters =
-    searchUserId || selectedStatus || minAmount || maxAmount;
+    searchUserId || selectedStatus || minAmount || maxAmount || startDate || endDate;
   
   const columns = [
     {
@@ -209,6 +296,81 @@ const AdminOrdersPage = () => {
         </Typography>
       )}
 
+      {/* Period Stats Card */}
+      {(startDate || endDate || selectedDateRange !== "all") && (
+        <Box
+          sx={{
+            mb: 3,
+            p: 3,
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            borderRadius: 2,
+            color: "white",
+            boxShadow: "0 8px 32px rgba(102, 126, 234, 0.4)",
+            backdropFilter: "blur(10px)",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 2,
+                  bgcolor: "rgba(255, 255, 255, 0.2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <AttachMoney
+                  sx={{
+                    fontSize: 32,
+                    color: "white",
+                  }}
+                />
+              </Box>
+              <Box>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  Total de Período
+                </Typography>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 700,
+                    mt: 0.5,
+                  }}
+                >
+                  ${periodTotal.toFixed(2)}
+                </Typography>
+              </Box>
+            </Box>
+            <Box sx={{ textAlign: "right" }}>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                {orders.length} ordenes en esta página
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  opacity: 0.9,
+                  mt: 1,
+                }}
+              >
+                {selectedDateRange === "today" && "📅 Hoy"}
+                {selectedDateRange === "week" && "📅 Esta Semana"}
+                {selectedDateRange === "month" && "📅 Este Mes"}
+                {selectedDateRange === "custom" &&
+                  `📅 ${startDate} a ${endDate}`}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      )}
+
       {/* Filters Section */}
       <FilterPanel
         hasActiveFilters={!!hasActiveFilters}
@@ -238,6 +400,72 @@ const AdminOrdersPage = () => {
           </Box>
         }
       >
+        {/* Date Range Presets */}
+        <Grid item xs={12}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              Date Range:
+            </Typography>
+            <ButtonGroup size="small" variant="outlined">
+              <Button
+                onClick={() => handleDateRangePreset("all")}
+                variant={selectedDateRange === "all" ? "contained" : "outlined"}
+              >
+                All Time
+              </Button>
+              <Button
+                onClick={() => handleDateRangePreset("today")}
+                variant={selectedDateRange === "today" ? "contained" : "outlined"}
+              >
+                Today
+              </Button>
+              <Button
+                onClick={() => handleDateRangePreset("week")}
+                variant={selectedDateRange === "week" ? "contained" : "outlined"}
+              >
+                This Week
+              </Button>
+              <Button
+                onClick={() => handleDateRangePreset("month")}
+                variant={selectedDateRange === "month" ? "contained" : "outlined"}
+              >
+                This Month
+              </Button>
+            </ButtonGroup>
+          </Box>
+        </Grid>
+
+        {/* Custom Date Range */}
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            label="Start Date"
+            type="date"
+            value={startDate}
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              setSelectedDateRange("custom");
+            }}
+            InputLabelProps={{ shrink: true }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            label="End Date"
+            type="date"
+            value={endDate}
+            onChange={(e) => {
+              setEndDate(e.target.value);
+              setSelectedDateRange("custom");
+            }}
+            InputLabelProps={{ shrink: true }}
+          />
+        </Grid>
+
         {/* User ID Search */}
         <Grid item xs={12} md={3}>
           <TextField

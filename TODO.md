@@ -62,7 +62,7 @@
 - [ ] **Reportes exportables**: Excel/PDF de ventas por período
 - [ ] **Analytics integration**: Google Analytics o similar
 - [ ] **Audit log**: Registro de todas las acciones de admin
-- [ ] **User management**: CRUD de usuarios y permisos
+- [ ] **User management**: CRUD de usuarios
 
 ### User Features
 
