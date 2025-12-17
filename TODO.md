@@ -12,6 +12,7 @@
 - [ ] **Barra de navegación responsive**: Agregar favoritos, ordenes y mi cuenta en un dropdown para que entre la navbar en mobile.
 - [ ] **Usar slug en las URLS de productos**
 - [ ] **Ocultar IDs donde sea posible reales** i.e order ids, product ids, ...
+- [ ] **Monto mínimo de compra**: backend y frontend.
 
 ### User Experience
 
