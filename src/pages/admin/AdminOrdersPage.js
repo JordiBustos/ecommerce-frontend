@@ -140,7 +140,7 @@ const AdminOrdersPage = () => {
 
   const hasActiveFilters =
     searchUserId || selectedStatus || minAmount || maxAmount;
-
+  
   const columns = [
     {
       field: "id",
@@ -211,7 +211,7 @@ const AdminOrdersPage = () => {
 
       {/* Filters Section */}
       <FilterPanel
-        hasActiveFilters={hasActiveFilters}
+        hasActiveFilters={!!hasActiveFilters}
         onClearFilters={handleClearFilters}
         resultsInfo={
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
