@@ -6,7 +6,6 @@ import {
   Paper,
   Grid,
   Chip,
-  CircularProgress,
   Button,
   IconButton,
   Divider,
@@ -14,6 +13,7 @@ import {
   CardContent,
   Alert,
   Breadcrumbs,
+  Skeleton,
   Link as MuiLink,
 } from "@mui/material";
 import {
@@ -37,6 +37,7 @@ import { useCart } from "../contexts/CartContext";
 import { useFavorites } from "../contexts/FavoritesContext";
 import { useAuth } from "../contexts/AuthContext";
 import ProductCarousel from "../components/ProductCarousel";
+import { CardSkeleton, ProductDetailSkeleton } from "../components/ProductsSkeletons.js";
 import { useMemo } from "react";
 
 /**
@@ -54,6 +55,7 @@ const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [similarProducts, setSimilarProducts] = useState([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -102,6 +104,8 @@ const ProductDetailPage = () => {
     if (!product || categoryPath.length === 0) return;
 
     const fetchSimilar = async () => {
+      // 3. CAMBIO: Activamos el loading específico al empezar
+      setLoadingSimilar(true);
       try {
         const brandId = product.brand_id;
 
@@ -124,6 +128,8 @@ const ProductDetailPage = () => {
         setSimilarProducts(filteredProducts);
       } catch (error) {
         console.error("Failed to load similar products", error);
+      } finally {
+        setLoadingSimilar(false);
       }
     };
 
@@ -193,16 +199,7 @@ const ProductDetailPage = () => {
   };
 
   if (loading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="60vh"
-      >
-        <CircularProgress />
-      </Box>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (!product) {
@@ -279,8 +276,8 @@ const ProductDetailPage = () => {
                 isAlwaysInStock
                   ? "Always in Stock"
                   : isInStock
-                  ? `${product.stock} in stock`
-                  : "Out of Stock"
+                    ? `${product.stock} in stock`
+                    : "Out of Stock"
               }
               color={isInStock ? "success" : "error"}
               sx={{
@@ -453,9 +450,12 @@ const ProductDetailPage = () => {
                         <Typography variant="body2" color="text.secondary">
                           SKU:
                         </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {product.sku}
-                        </Typography>
+                        {loading ? (
+                          <Skeleton variant="text" width={80} />
+                        ) : (
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {product.sku}
+                          </Typography>)}
                       </Box>
                     </Grid>
                   )}
@@ -591,17 +591,31 @@ const ProductDetailPage = () => {
       </Grid>
 
       {/* Similar Products */}
-      {similarProducts.length > 0 && (
-        <Box sx={{ mt: 8 }}>
-          <Typography
-            variant="h5"
-            sx={{ mb: 3, fontWeight: 600, color: "text.primary" }}
-          >
-            Similar Products
-          </Typography>
+      <Box sx={{ mt: 8 }}>
+        <Typography
+          variant="h5"
+          sx={{ mb: 3, fontWeight: 600, color: "text.primary" }}
+        >
+          Similar Products
+        </Typography>
+        {/* TODO: Mostrar ambos skeletons, fixear bug de loadings */}
+        {loadingSimilar ? (
+          <Box sx={{ px: 6 }}>
+            <Box sx={{ display: 'flex', gap: 2, overflow: 'hidden', p: 1 }}>
+              {[1, 2, 3].map((index) => (
+                <Box
+                  key={index}
+                  sx={{ minWidth: 250, flex: 1 }}
+                >
+                  <CardSkeleton index={index} />
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        ) : (
           <ProductCarousel products={similarProducts} compact={false} />
-        </Box>
-      )}
+        )}
+      </Box>
     </Container>
   );
 };
