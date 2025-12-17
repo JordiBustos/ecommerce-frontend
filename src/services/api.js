@@ -128,7 +128,7 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest);
         } catch (refreshError) {
           clearTokens();
-          if (notificationHandler) {
+          if (window.location.pathname !== "/login" && notificationHandler) {
             notificationHandler("Session expired. Please log in again.", {
               variant: "warning",
             });
@@ -142,11 +142,13 @@ apiClient.interceptors.response.use(
         }
       } else {
         clearTokens();
-        if (notificationHandler) {
+        
+        if (window.location.pathname !== "/login" && notificationHandler) {
           notificationHandler("Please log in to continue.", {
             variant: "info",
           });
         }
+
         if (window.location.pathname !== "/login") {
            setTimeout(() => {
              window.location.href = "/login";
