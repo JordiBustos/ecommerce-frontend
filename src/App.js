@@ -65,28 +65,11 @@ const AppContent = () => {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                <Route
-                  path="/shipping-policy"
-                  element={<ShippingPolicyPage />}
-                />
-
+                <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+                <Route path="/products" element={<ProductsPage />} />
+                <Route path="/products/:productId" element={<ProductDetailPage />} />
+                
                 {/* Protected routes */}
-                <Route
-                  path="/products"
-                  element={
-                    <ProtectedRoute>
-                      <ProductsPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/products/:productId"
-                  element={
-                    <ProtectedRoute>
-                      <ProductDetailPage />
-                    </ProtectedRoute>
-                  }
-                />
                 <Route
                   path="/cart"
                   element={
