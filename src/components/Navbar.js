@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -20,6 +20,7 @@ import {
   Receipt as ReceiptIcon,
   AdminPanelSettings as AdminIcon,
   Inventory as InventoryIcon,
+  People as PeopleIcon,
   ShoppingCartOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -137,6 +138,22 @@ const Navbar = () => {
                           <InventoryIcon fontSize="small" />
                         </ListItemIcon>
                         <ListItemText>Brands</ListItemText>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => handleAdminNavigation("/admin/roles")}
+                      >
+                        <ListItemIcon>
+                          <PeopleIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Roles</ListItemText>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => handleAdminNavigation("/admin/users")}
+                      >
+                        <ListItemIcon>
+                          <PeopleIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Users</ListItemText>
                       </MenuItem>
                     </Menu>
                   </>

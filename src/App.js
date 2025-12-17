@@ -37,6 +37,8 @@ import AdminEditProductPage from "./pages/admin/AdminEditProductPage";
 import AddProductPage from "./pages/admin/AddProductPage";
 import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
 import AdminBrandsPage from "./pages/admin/AdminBrandsPage";
+import AdminRolesPage from "./pages/admin/AdminRolesPage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
 
 /**
  * Inner app component to access snackbar
@@ -204,6 +206,22 @@ const AppContent = () => {
                   element={
                     <AdminRoute>
                       <AdminBrandsPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/roles"
+                  element={
+                    <AdminRoute>
+                      <AdminRolesPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <AdminRoute>
+                      <AdminUsersPage />
                     </AdminRoute>
                   }
                 />
