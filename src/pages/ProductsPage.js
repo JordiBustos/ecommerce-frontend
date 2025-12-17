@@ -6,7 +6,6 @@ import {
   Button,
   Box,
   TextField,
-  CircularProgress,
   Alert,
   Paper,
   FormGroup,
@@ -17,6 +16,7 @@ import {
   IconButton,
   Drawer,
   Chip,
+  Skeleton,
 } from "@mui/material";
 import {
   FilterList as FilterListIcon,
@@ -28,6 +28,7 @@ import { useSearchParams } from "react-router-dom";
 import productService from "../services/productService";
 import { useCart } from "../contexts/CartContext";
 import ProductCard from "../components/ProductCard";
+import { SidebarSkeleton, CardSkeleton } from "../components/ProductsSkeletons.js";
 import { useSnackbar } from "notistack";
 
 /**
@@ -197,7 +198,7 @@ const ProductsPage = () => {
    */
   const handleCategoryClick = (category) => {
     const children = getCategoryChildren(category.id);
-    
+
     if (children.length > 0) {
       // Has children, add to path for drill-down
       setCategoryPath((prev) => [...prev, category]);
@@ -299,10 +300,10 @@ const ProductsPage = () => {
    */
   const FiltersSidebar = () => {
     // Get current level categories based on path
-    const currentParentId = categoryPath.length > 0 
-      ? categoryPath[categoryPath.length - 1].id 
+    const currentParentId = categoryPath.length > 0
+      ? categoryPath[categoryPath.length - 1].id
       : null;
-    
+
     const currentLevelCategories = categories.filter(
       (cat) => cat.parent_id === currentParentId
     );
@@ -353,8 +354,8 @@ const ProductsPage = () => {
                   <Button
                     size="small"
                     onClick={() => handleCategoryBack(index - 1)}
-                    sx={{ 
-                      textTransform: "none", 
+                    sx={{
+                      textTransform: "none",
                       minWidth: "auto",
                       color: "text.secondary",
                       fontSize: "0.875rem"
@@ -493,19 +494,6 @@ const ProductsPage = () => {
     );
   };
 
-  if (loading && products.length === 0) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="60vh"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* Header */}
@@ -513,12 +501,16 @@ const ProductsPage = () => {
         <Typography variant="h3" gutterBottom>
           Products Catalogue
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {totalProducts > 0 &&
-            `${totalProducts} product${
-              totalProducts !== 1 ? "s" : ""
-            } available`}
-        </Typography>
+        {/* Skeleton header */}
+        {loading ? (
+          <Skeleton width={200} />
+        ) : (
+          <Typography variant="body1" color="text.secondary">
+            {totalProducts > 0 &&
+              `${totalProducts} product${totalProducts !== 1 ? "s" : ""
+              } available`}
+          </Typography>
+        )}
       </Box>
 
       {/* Search Bar */}
@@ -560,7 +552,12 @@ const ProductsPage = () => {
       <Grid container spacing={3}>
         {/* Filters Sidebar - Desktop */}
         <Grid item xs={12} md={3} sx={{ display: { xs: "none", md: "block" } }}>
-          <FiltersSidebar />
+          {/* Skeleton Sidebar */}
+          {loading ? (
+            <SidebarSkeleton />
+          ) : (
+            <FiltersSidebar />
+          )}
         </Grid>
 
         {/* Filters Drawer - Mobile */}
@@ -578,14 +575,14 @@ const ProductsPage = () => {
         {/* Products Grid */}
         <Grid item xs={12} md={9}>
           {loading ? (
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              minHeight="40vh"
-            >
-              <CircularProgress />
-            </Box>
+            /* Skeletons Products Grid */
+            <Grid container spacing={3}>
+              {[1, 2, 3, 4, 5, 6].map((index) => (
+                <Grid item xs={12} sm={6} lg={4} key={index}>
+                  <CardSkeleton />
+                </Grid>
+              ))}
+            </Grid>
           ) : (
             <>
               {products.length > 0 ? (
