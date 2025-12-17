@@ -32,7 +32,7 @@
 
 ### CRUD Completo
 
-- [ ] **Listas de precios**: Gestión de precios por mayorista/minorista
+- [ ] **Listas de precios**: Gestión de lista de precios - agregar que cada lista de precios contenga uno o más roles y mostrar el precio correspondiente en la card de producto e.g si el usuario es VIP y una lista de precio está asignada al rol VIP, mostrar ese precio en vez del de producto.
 - [ ] **Export CSV**: Exportar productos masivamente
 - [ ] **Bulk operations**: Editar múltiples productos a la vez (precio, stock, status) (quizá se resuelve con 2.)
 - [ ] **Product variants**: Soporte para variantes (talla, color, etc.)
@@ -45,11 +45,6 @@
 - [ ] **Tracking de envío**: Integrar seguimiento de paquetería
 - [ ] **Historial de cambios de orden**: Log de modificaciones en estado de órdenes
 - [ ] **Cancelación de orden**: Permitir a usuarios cancelar órdenes pendientes
-
-### Sistema de roles
-
-- [ ] **Rol consumidor final**
-- [ ] **Rol mayorista**
 
 ## 🟢 Mejoras / Baja Prioridad
 
