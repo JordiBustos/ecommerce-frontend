@@ -67,7 +67,7 @@ const AppContent = () => {
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
                 <Route path="/products" element={<ProductsPage />} />
-                <Route path="/products/:productId" element={<ProductDetailPage />} />
+                <Route path="/products/:productSlug" element={<ProductDetailPage />} />
                 
                 {/* Protected routes */}
                 <Route
@@ -169,7 +169,7 @@ const AppContent = () => {
                   }
                 />
                 <Route
-                  path="/admin/products/:productId/edit"
+                  path="/admin/products/:productSlug/edit"
                   element={
                     <AdminRoute>
                       <AdminEditProductPage />

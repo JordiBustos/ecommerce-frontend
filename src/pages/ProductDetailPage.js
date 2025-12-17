@@ -44,7 +44,7 @@ import { useMemo } from "react";
  * Product detail page component
  */
 const ProductDetailPage = () => {
-  const { productId } = useParams();
+  const { productSlug } = useParams();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { addToCart } = useCart();
@@ -62,7 +62,7 @@ const ProductDetailPage = () => {
       setLoading(true);
       try {
         const [productData, categoriesData] = await Promise.all([
-          productService.getProductById(productId),
+          productService.getProductBySlug(productSlug),
           productService.getCategories(),
         ]);
 
@@ -77,7 +77,7 @@ const ProductDetailPage = () => {
     };
 
     loadData();
-  }, [productId, navigate, enqueueSnackbar]);
+  }, [productSlug, navigate, enqueueSnackbar]);
 
   const isFav = useMemo(() => {
     if (!product || !isAuthenticated) return false;

@@ -70,8 +70,8 @@ const OrderDetailPage = () => {
         const itemsWithProducts = await Promise.all(
           data.items.map(async (item) => {
             try {
-              const product = await productService.getProductById(
-                item.product_id
+              const product = await productService.getProductBySlug(
+                item.product_slug
               );
               return {
                 ...item,
@@ -79,7 +79,7 @@ const OrderDetailPage = () => {
               };
             } catch (error) {
               console.error(
-                `Failed to load product ${item.product_id}:`,
+                `Failed to load product ${item.product_slug}:`,
                 error
               );
               return {

@@ -10,7 +10,6 @@
 - [ ] **Categorías en dropdown**: Corregir jerarquía
 - [ ] **Agregar field delivery date a orden**: Permitir al admin setear delivery date en la orden del usuario.
 - [ ] **Barra de navegación responsive**: Agregar favoritos, ordenes y mi cuenta en un dropdown para que entre la navbar en mobile.
-- [ ] **Usar slug en las URLS de productos**
 - [ ] **Ocultar IDs donde sea posible reales** i.e order ids, product ids, ...
 - [ ] **Monto mínimo de compra**: backend y frontend.
 

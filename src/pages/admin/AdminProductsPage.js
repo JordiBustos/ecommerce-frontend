@@ -394,7 +394,7 @@ const AdminProductsPage = () => {
             color="primary"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/admin/products/${row.id}/edit`);
+              navigate(`/admin/products/${row.slug}/edit`);
             }}
             size="small"
             title="Edit product"

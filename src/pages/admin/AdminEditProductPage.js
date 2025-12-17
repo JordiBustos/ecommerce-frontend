@@ -27,7 +27,7 @@ import { useForm } from "../../hooks";
  * Admin page to edit product details
  */
 const AdminEditProductPage = () => {
-  const { productId } = useParams();
+  const { productSlug } = useParams();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -62,7 +62,7 @@ const AdminEditProductPage = () => {
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId]);
+  }, [productSlug]);
 
   /**
    * Load product, categories, and brands
@@ -71,7 +71,7 @@ const AdminEditProductPage = () => {
     try {
       setLoading(true);
       const [productData, categoriesData, brandsData] = await Promise.all([
-        productService.getProductById(productId),
+        productService.getProductBySlug(productSlug),
         productService.getCategories(),
         productService.getBrands(),
       ]);
@@ -170,7 +170,7 @@ const AdminEditProductPage = () => {
         is_active: formValues.is_active,
       };
 
-      await productService.updateProduct(productId, updateData);
+      await productService.updateProduct(product.slug, updateData);
       enqueueSnackbar("Product updated successfully", { variant: "success" });
       navigate("/admin/products");
     } catch (error) {
@@ -227,7 +227,7 @@ const AdminEditProductPage = () => {
           Edit Product
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Update product information - #{productId}
+          Update product information - {product?.name || "Loading..."}
         </Typography>
       </Box>
 

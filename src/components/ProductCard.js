@@ -74,7 +74,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
   };
 
   const handleCardClick = () => {
-    navigate(`/products/${product.id}`);
+    navigate(`/products/${product.slug}`);
   };
 
   const handleToggleFavorite = async (e) => {

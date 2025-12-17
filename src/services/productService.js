@@ -36,6 +36,16 @@ const productService = {
   },
 
   /**
+   * Get product by slug
+   * @param {string} slug - Product slug
+   * @returns {Promise<Product>} Product data
+   */
+  async getProductBySlug(slug) {
+    const response = await apiClient.get(`/products/${slug}`);
+    return response.data;
+  },
+
+  /**
    * Search products
    * @param {string} query - Search query
    * @param {Object} params - Additional query parameters
@@ -96,7 +106,7 @@ const productService = {
   async importProductsFromCSV(file, batchSize = 50) {
     const formData = new FormData();
     formData.append("file", file);
-    
+
     const response = await apiClient.post(
       `/products/import/csv?batch_size=${batchSize}`,
       formData,
@@ -167,7 +177,10 @@ const productService = {
    * @returns {Promise<Object>} Updated category
    */
   async updateCategory(categoryId, categoryData) {
-    const response = await apiClient.put(`/products/categories/${categoryId}`, categoryData);
+    const response = await apiClient.put(
+      `/products/categories/${categoryId}`,
+      categoryData
+    );
     return response.data;
   },
 
@@ -177,7 +190,9 @@ const productService = {
    * @returns {Promise<void>}
    */
   async deleteCategory(categoryId) {
-    const response = await apiClient.delete(`/products/categories/${categoryId}`);
+    const response = await apiClient.delete(
+      `/products/categories/${categoryId}`
+    );
     return response.data;
   },
 
@@ -209,7 +224,10 @@ const productService = {
    * @returns {Promise<Object>} Updated brand
    */
   async updateBrand(brandId, brandData) {
-    const response = await apiClient.put(`/products/brands/${brandId}`, brandData);
+    const response = await apiClient.put(
+      `/products/brands/${brandId}`,
+      brandData
+    );
     return response.data;
   },
 
