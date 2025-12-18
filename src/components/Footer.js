@@ -18,9 +18,8 @@ import {
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import { useStore } from '../contexts/StoreContext';
-import productService from '../services/productService';
+import { useCategories } from '../contexts/CategoriesContext';
 import newsletterService from '../services/newsletterService';
-import useDataFetching from '../hooks/useDataFetching';
 import ScrollLink from './ScrollLink';
 
 /**
@@ -29,17 +28,12 @@ import ScrollLink from './ScrollLink';
 const Footer = () => {
   const { enqueueSnackbar } = useSnackbar();
   const { storeSettings } = useStore();
+  const { categories } = useCategories(); // Get categories from context
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   
-  // Use custom hook for fetching categories
-  const { data: categories = [] } = useDataFetching(
-    async () => {
-      const data = await productService.getCategories();
-      return data.slice(0, 5); // Show only first 5
-    },
-    []
-  );
+  // Show only first 5 categories
+  const displayCategories = categories.slice(0, 5);
 
   /**
    * Handle newsletter subscription
@@ -224,8 +218,8 @@ const Footer = () => {
               Categorías
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {Array.isArray(categories) && categories.length > 0 ? (
-                categories.map((category) => (
+              {Array.isArray(displayCategories) && displayCategories.length > 0 ? (
+                displayCategories.map((category) => (
                   <ScrollLink
                     key={category.id}
                     to={`/products?category=${category.id}`}

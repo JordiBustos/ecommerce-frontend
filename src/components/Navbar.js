@@ -28,6 +28,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useCart } from "../contexts/CartContext";
 import { useStore } from "../contexts/StoreContext";
 import config from "../config";
+import CategoriesMenu from "./CategoriesMenu";
 
 /**
  * Navigation bar component
@@ -71,6 +72,8 @@ const Navbar = () => {
           >
             {storeSettings?.store_name || config.app.name}
           </Typography>
+
+          <CategoriesMenu />
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {isAuthenticated ? (

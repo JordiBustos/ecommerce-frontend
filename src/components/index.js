@@ -4,6 +4,7 @@ export { default as ErrorState } from './ErrorState';
 export { default as DataTable } from './DataTable';
 export { default as ScrollLink } from './ScrollLink';
 export { default as Navbar } from './Navbar';
+export { default as CategoriesMenu } from './CategoriesMenu';
 export { default as ProductCarousel } from './ProductCarousel';
 export { default as ProtectedRoute } from './ProtectedRoute';
 export { default as AdminRoute } from './AdminRoute';

@@ -34,6 +34,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { DataTable, PageHeader, FilterPanel } from "../../../components";
+import { useCategories } from "../../../contexts/CategoriesContext";
 import productService from "../../../services/productService";
 
 /**
@@ -42,8 +43,8 @@ import productService from "../../../services/productService";
 const AdminProductsPage = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const { categoriesFlat } = useCategories();
   const [refreshKey, setRefreshKey] = useState(0);
-  const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -75,15 +76,11 @@ const AdminProductsPage = () => {
   const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
   const [deletingAll, setDeletingAll] = useState(false);
 
-  // Load categories and brands for filters
+  // Load brands for filters (categories from context)
   useEffect(() => {
     const loadFilters = async () => {
       try {
-        const [categoriesData, brandsData] = await Promise.all([
-          productService.getCategories(),
-          productService.getBrands(),
-        ]);
-        setCategories(categoriesData);
+        const brandsData = await productService.getBrands();
         setBrands(brandsData);
       } catch (error) {
         console.error("Failed to load filters:", error);
@@ -592,8 +589,9 @@ const AdminProductsPage = () => {
               label="Category"
             >
               <MenuItem value="">All Categories</MenuItem>
-              {categories.map((category) => (
+              {categoriesFlat.map((category) => (
                 <MenuItem key={category.id} value={category.id}>
+                  {"\u00A0\u00A0\u00A0".repeat(category.depth)}
                   {category.name}
                 </MenuItem>
               ))}

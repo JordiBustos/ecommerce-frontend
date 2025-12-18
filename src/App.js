@@ -6,6 +6,7 @@ import { StoreProvider } from "./contexts/StoreContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import { FavoritesProvider } from "./contexts/FavoritesContext";
+import { CategoriesProvider } from "./contexts/CategoriesContext";
 import { setNotificationHandler } from "./services/api";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -57,10 +58,11 @@ const AppContent = () => {
       <CssBaseline />
       <Router>
         <AuthProvider>
-          <CartProvider>
-            <FavoritesProvider>
-              <Navbar />
-              <Routes>
+          <CategoriesProvider>
+            <CartProvider>
+              <FavoritesProvider>
+                <Navbar />
+                <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
@@ -227,6 +229,7 @@ const AppContent = () => {
               <Footer />
             </FavoritesProvider>
           </CartProvider>
+          </CategoriesProvider>
         </AuthProvider>
       </Router>
     </StoreProvider>

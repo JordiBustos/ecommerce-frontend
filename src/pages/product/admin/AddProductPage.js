@@ -19,6 +19,7 @@ import { ArrowBack as ArrowBackIcon, SaveOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import productService from "../../../services/productService";
+import { useCategories } from "../../../contexts/CategoriesContext";
 import { useForm } from "../../../hooks";
 
 /**
@@ -27,20 +28,15 @@ import { useForm } from "../../../hooks";
 const AddProductPage = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const [categories, setCategories] = useState([]);
+  const { categoriesFlat } = useCategories();
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
-  // Load categories and brands
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [categoriesData, brandsData] = await Promise.all([
-          productService.getCategories(),
-          productService.getBrands(),
-        ]);
-        setCategories(categoriesData);
+        const brandsData = await productService.getBrands();
         setBrands(brandsData);
       } catch (error) {
         enqueueSnackbar("Failed to load form data", { variant: "error" });
@@ -52,7 +48,6 @@ const AddProductPage = () => {
     loadData();
   }, [enqueueSnackbar]);
 
-  // Form handling
   const initialValues = {
     sku: "",
     ean: "",
@@ -102,7 +97,6 @@ const AddProductPage = () => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      // Convert string values to numbers
       const productData = {
         ...values,
         price: parseFloat(values.price) || 0,
@@ -134,12 +128,10 @@ const AddProductPage = () => {
     handleSubmit: onSubmit,
   } = useForm(initialValues, handleSubmit, validateForm);
 
-  // Auto-generate slug from name
   const handleNameChange = (e) => {
     const name = e.target.value;
     handleChange(e);
 
-    // Auto-generate slug if it's empty or hasn't been manually edited
     if (!values.slug || values.slug === generateSlug(values.name)) {
       const slugEvent = {
         target: {
@@ -391,9 +383,9 @@ const AddProductPage = () => {
                   <MenuItem value="">
                     <em>Select a category</em>
                   </MenuItem>
-                  {categories.map((category) => (
+                  {categoriesFlat.map((category) => (
                     <MenuItem key={category.id} value={category.id}>
-                      {category.parent_id && "— "}
+                      {"\u00A0\u00A0\u00A0".repeat(category.depth)}
                       {category.name}
                     </MenuItem>
                   ))}

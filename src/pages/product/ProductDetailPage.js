@@ -36,6 +36,7 @@ import productService from "../../services/productService.js";
 import { useCart } from "../../contexts/CartContext.js";
 import { useFavorites } from "../../contexts/FavoritesContext.js";
 import { useAuth } from "../../contexts/AuthContext.js";
+import { useCategories } from "../../contexts/CategoriesContext.js";
 import ProductCarousel from "../../components/ProductCarousel.js";
 import {
   CardSkeleton,
@@ -62,9 +63,9 @@ const ProductDetailPage = () => {
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isAuthenticated } = useAuth();
+  const { categories } = useCategories(); // Get categories from context
 
   const [product, setProduct] = useState(null);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [similarProducts, setSimilarProducts] = useState([]);
@@ -76,15 +77,11 @@ const ProductDetailPage = () => {
 
     const loadData = async () => {
       try {
-        const [productData, categoriesData] = await Promise.all([
-          productService.getProductBySlug(productSlug),
-          productService.getCategories(),
-        ]);
+        const productData = await productService.getProductBySlug(productSlug);
 
         if (isMounted) {
           // Batch updates where possible (React 18 does this auto, but good practice)
           setProduct(productData);
-          setCategories(categoriesData);
           // Reset quantity on new product load
           setQuantity(1);
         }

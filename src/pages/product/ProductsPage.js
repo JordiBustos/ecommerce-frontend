@@ -27,6 +27,7 @@ import {
 import { useSearchParams } from "react-router-dom";
 import productService from "../../services/productService.js";
 import { useCart } from "../../contexts/CartContext.js";
+import { useCategories } from "../../contexts/CategoriesContext.js";
 import ProductCard from "../../components/ProductCard.js";
 import { SidebarSkeleton, CardSkeleton } from "../../components/ProductsSkeletons.js";
 import { useSnackbar } from "notistack";
@@ -41,7 +42,7 @@ const ProductsPage = () => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [categories, setCategories] = useState([]);
+  const { categories } = useCategories(); // Get categories from context
   const [brands, setBrands] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
@@ -56,15 +57,11 @@ const ProductsPage = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   /**
-   * Load categories and brands
+   * Load brands only (categories from context)
    */
   const loadFilters = useCallback(async () => {
     try {
-      const [categoriesData, brandsData] = await Promise.all([
-        productService.getCategories(),
-        productService.getBrands(),
-      ]);
-      setCategories(categoriesData);
+      const brandsData = await productService.getBrands();
       setBrands(brandsData);
     } catch (err) {
       enqueueSnackbar("Failed to load filters", { variant: "error" });
@@ -83,7 +80,7 @@ const ProductsPage = () => {
   }, [searchInput]);
 
   /**
-   * Load categories and brands on mount
+   * Load brands on mount (categories from context)
    */
   useEffect(() => {
     loadFilters();

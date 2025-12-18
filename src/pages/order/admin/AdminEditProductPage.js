@@ -21,6 +21,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import productService from "../../../services/productService";
+import { useCategories } from "../../../contexts/CategoriesContext";
 import { useForm } from "../../../hooks";
 
 /**
@@ -30,10 +31,10 @@ const AdminEditProductPage = () => {
   const { productSlug } = useParams();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const { categoriesFlat } = useCategories();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [product, setProduct] = useState(null);
 
@@ -65,19 +66,17 @@ const AdminEditProductPage = () => {
   }, [productSlug]);
 
   /**
-   * Load product, categories, and brands
+   * Load product and brands (categories from context)
    */
   const loadData = async () => {
     try {
       setLoading(true);
-      const [productData, categoriesData, brandsData] = await Promise.all([
+      const [productData, brandsData] = await Promise.all([
         productService.getProductBySlug(productSlug),
-        productService.getCategories(),
         productService.getBrands(),
       ]);
 
       setProduct(productData);
-      setCategories(categoriesData);
       setBrands(brandsData);
 
       // Set form values from product data
@@ -448,8 +447,9 @@ const AdminEditProductPage = () => {
                 <MenuItem value="">
                   <em>None</em>
                 </MenuItem>
-                {categories.map((category) => (
+                {categoriesFlat.map((category) => (
                   <MenuItem key={category.id} value={category.id}>
+                    {"\u00A0\u00A0\u00A0".repeat(category.depth)}
                     {category.name}
                   </MenuItem>
                 ))}
