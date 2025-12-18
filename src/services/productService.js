@@ -26,16 +26,6 @@ const productService = {
   },
 
   /**
-   * Get product by ID
-   * @param {number} productId - Product ID
-   * @returns {Promise<Product>} Product data
-   */
-  async getProductById(productId) {
-    const response = await apiClient.get(`/products/${productId}`);
-    return response.data;
-  },
-
-  /**
    * Get product by slug
    * @param {string} slug - Product slug
    * @returns {Promise<Product>} Product data

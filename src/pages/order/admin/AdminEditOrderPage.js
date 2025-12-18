@@ -94,10 +94,10 @@ const AdminEditOrderPage = () => {
         const itemsWithProducts = await Promise.all(
           orderData.items.map(async (item) => {
             try {
-              const product = await productService.getProductById(item.product_id);
+              const product = await productService.getProductBySlug(item.product_slug);
               return { ...item, product };
             } catch (err) {
-              console.error(`Failed to fetch product ${item.product_id}:`, err);
+              console.error(`Failed to fetch product ${item.product_slug}:`, err);
               return { ...item, product: null };
             }
           })
@@ -491,12 +491,12 @@ const AdminEditOrderPage = () => {
                                 {item.product.name}
                               </Typography>
                               <Typography variant="caption" color="text.secondary">
-                                ID: #{item.product_id}
+                                Slug: {item.product_slug}
                               </Typography>
                             </Box>
                           ) : (
                             <Typography variant="body2" color="text.secondary">
-                              Product #{item.product_id} (Not found)
+                              Product {item.product_slug} (Not found)
                             </Typography>
                           )}
                         </TableCell>
