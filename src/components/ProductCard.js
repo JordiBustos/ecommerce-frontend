@@ -196,17 +196,63 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
         )}
 
         {/* Price */}
-        <Typography
-          variant="h5"
-          color="text.primary"
-          sx={{
-            fontWeight: 700,
-            mb: 1,
-            fontSize: compact ? "1.3rem" : "1.5rem",
-          }}
-        >
-          ${product.price?.toFixed(2)}
-        </Typography>
+        <Box sx={{ mb: 1 }}>
+          {product.has_discount ? (
+            <Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+                <Typography
+                  variant="h5"
+                  color="error.main"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: compact ? "1.3rem" : "1.5rem",
+                  }}
+                >
+                  ${product.final_price?.toFixed(2)}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    textDecoration: "line-through",
+                    color: "text.secondary",
+                    fontSize: compact ? "0.9rem" : "1rem",
+                  }}
+                >
+                  ${product.price?.toFixed(2)}
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    bgcolor: "error.main",
+                    color: "white",
+                    px: 1,
+                    py: 0.3,
+                    borderRadius: 1,
+                    fontWeight: 600,
+                  }}
+                >
+                  {product.savings_percent?.toFixed(0)}% OFF
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Save ${product.savings?.toFixed(2)}
+                </Typography>
+              </Box>
+            </Box>
+          ) : (
+            <Typography
+              variant="h5"
+              color="text.primary"
+              sx={{
+                fontWeight: 700,
+                fontSize: compact ? "1.3rem" : "1.5rem",
+              }}
+            >
+              ${product.final_price?.toFixed(2) || product.price?.toFixed(2)}
+            </Typography>
+          )}
+        </Box>
 
         {/* Stock Status */}
         <Typography

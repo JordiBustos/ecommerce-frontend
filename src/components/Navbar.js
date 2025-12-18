@@ -155,6 +155,16 @@ const Navbar = () => {
                         </ListItemIcon>
                         <ListItemText>Users</ListItemText>
                       </MenuItem>
+                      <MenuItem
+                        onClick={() =>
+                          handleAdminNavigation("/admin/price-lists")
+                        }
+                      >
+                        <ListItemIcon>
+                          <InventoryIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Price Lists</ListItemText>
+                      </MenuItem>
                     </Menu>
                   </>
                 )}
