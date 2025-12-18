@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Typography,
@@ -37,8 +37,20 @@ import { useCart } from "../contexts/CartContext";
 import { useFavorites } from "../contexts/FavoritesContext";
 import { useAuth } from "../contexts/AuthContext";
 import ProductCarousel from "../components/ProductCarousel";
-import { CardSkeleton, ProductDetailSkeleton } from "../components/ProductsSkeletons.js";
+import {
+  CardSkeleton,
+  ProductDetailSkeleton,
+} from "../components/ProductsSkeletons.js";
 import { useMemo } from "react";
+
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  return new Date(dateString).toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
 
 /**
  * Product detail page component
@@ -50,6 +62,7 @@ const ProductDetailPage = () => {
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isAuthenticated } = useAuth();
+
   const [product, setProduct] = useState(null);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,25 +71,40 @@ const ProductDetailPage = () => {
   const [loadingSimilar, setLoadingSimilar] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+
     const loadData = async () => {
-      setLoading(true);
       try {
         const [productData, categoriesData] = await Promise.all([
           productService.getProductBySlug(productSlug),
           productService.getCategories(),
         ]);
 
-        setProduct(productData);
-        setCategories(categoriesData);
+        if (isMounted) {
+          // Batch updates where possible (React 18 does this auto, but good practice)
+          setProduct(productData);
+          setCategories(categoriesData);
+          // Reset quantity on new product load
+          setQuantity(1);
+        }
       } catch (error) {
-        enqueueSnackbar("Failed to load product details", { variant: "error" });
-        navigate("/products");
+        if (isMounted) {
+          enqueueSnackbar("Failed to load product details", {
+            variant: "error",
+          });
+          navigate("/products");
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [productSlug, navigate, enqueueSnackbar]);
 
   const isFav = useMemo(() => {
@@ -88,6 +116,7 @@ const ProductDetailPage = () => {
     if (!product?.category_id || categories.length === 0) return [];
 
     const path = [];
+    // Create Map once per calculation for O(1) lookup
     const categoryMap = new Map(categories.map((c) => [c.id, c]));
 
     let currentId = product.category_id;
@@ -98,105 +127,95 @@ const ProductDetailPage = () => {
       currentId = category.parent_id;
     }
     return path;
-  }, [product, categories]);
+  }, [product?.category_id, categories]);
+
+  const productBrandId = product?.brand_id;
+  const productId = product?.id;
 
   useEffect(() => {
-    if (!product || categoryPath.length === 0) return;
+    if (!productId || !productBrandId || categoryPath.length === 0) return;
+
+    let isMounted = true;
 
     const fetchSimilar = async () => {
-      // 3. CAMBIO: Activamos el loading específico al empezar
       setLoadingSimilar(true);
       try {
-        const brandId = product.brand_id;
-
         const categoryIds = categoryPath.map((cat) => cat.id);
-
         const queryParams = {
           limit: 12,
           skip: 0,
-          brands_id: [brandId],
+          brands_id: [productBrandId],
           categories_id: categoryIds.join(","),
         };
 
-
         const data = await productService.getProducts(queryParams);
 
-        const filteredProducts = data.products.filter(
-          (p) => p.id !== product.id
-        );
-
-        setSimilarProducts(filteredProducts);
+        if (isMounted) {
+          const filteredProducts = data.products.filter(
+            (p) => p.id !== productId
+          );
+          setSimilarProducts(filteredProducts);
+        }
       } catch (error) {
         console.error("Failed to load similar products", error);
       } finally {
-        setLoadingSimilar(false);
+        if (isMounted) setLoadingSimilar(false);
       }
     };
 
     fetchSimilar();
-  }, [product, categoryPath]);
 
-  /**
-   * Handle quantity change
-   */
-  const handleDecrement = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-    }
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, [productId, productBrandId, categoryPath]);
 
-  const handleIncrement = () => {
+  const handleDecrement = useCallback(() => {
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  }, []);
+
+  const handleIncrement = useCallback(() => {
+    if (!product) return;
+
     if (product.max_per_buy && quantity >= product.max_per_buy) {
       enqueueSnackbar(`Maximum ${product.max_per_buy} per purchase`, {
         variant: "warning",
       });
       return;
     }
-    if (!product.is_always_in_stock && quantity >= product.stock) {
+
+    const isAlwaysInStock = product.is_always_in_stock;
+    if (!isAlwaysInStock && quantity >= product.stock) {
       enqueueSnackbar("Maximum available stock reached", {
         variant: "warning",
       });
       return;
     }
-    setQuantity(quantity + 1);
-  };
 
-  /**
-   * Handle add to cart
-   */
-  const handleAddToCart = async () => {
+    setQuantity((prev) => prev + 1);
+  }, [product, quantity, enqueueSnackbar]);
+
+  const handleAddToCart = useCallback(async () => {
+    if (!product) return;
     try {
       await addToCart(product.id, quantity);
       enqueueSnackbar("Product added to cart", { variant: "success" });
     } catch (error) {
       enqueueSnackbar("Failed to add to cart", { variant: "error" });
     }
-  };
+  }, [product, quantity, addToCart, enqueueSnackbar]);
 
-  /**
-   * Handle toggle favorite
-   */
-  const handleToggleFavorite = async () => {
-    if (!isAuthenticated) return; // Add your snackbar here
+  const handleToggleFavorite = useCallback(async () => {
+    if (!isAuthenticated) return;
+    if (!product) return;
+
     try {
       await toggleFavorite(product.id);
       enqueueSnackbar("Favorites updated", { variant: "success" });
     } catch (error) {
       enqueueSnackbar("Failed to update favorites", { variant: "error" });
     }
-  };
-
-  /**
-   * Format date
-   */
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+  }, [isAuthenticated, product, toggleFavorite, enqueueSnackbar]);
 
   if (loading) {
     return <ProductDetailSkeleton />;
@@ -276,8 +295,8 @@ const ProductDetailPage = () => {
                 isAlwaysInStock
                   ? "Always in Stock"
                   : isInStock
-                    ? `${product.stock} in stock`
-                    : "Out of Stock"
+                  ? `${product.stock} in stock`
+                  : "Out of Stock"
               }
               color={isInStock ? "success" : "error"}
               sx={{
@@ -336,7 +355,7 @@ const ProductDetailPage = () => {
               color="primary"
               sx={{ fontWeight: 700, mb: 3 }}
             >
-              ${product.price.toFixed(2)}
+              ${product.final_price.toFixed(2)}
             </Typography>
 
             <Divider sx={{ mb: 3 }} />
@@ -422,7 +441,7 @@ const ProductDetailPage = () => {
               {isInStock ? "Add to Cart" : "Out of Stock"}
             </Button>
 
-            {/* Shipping Info */}
+            {/* TODO: Make this value configurable -- Shipping Info */}
             <Alert
               icon={<ShippingIcon />}
               severity="info"
@@ -455,7 +474,8 @@ const ProductDetailPage = () => {
                         ) : (
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
                             {product.sku}
-                          </Typography>)}
+                          </Typography>
+                        )}
                       </Box>
                     </Grid>
                   )}
@@ -601,12 +621,9 @@ const ProductDetailPage = () => {
         {/* TODO: Mostrar ambos skeletons, fixear bug de loadings */}
         {loadingSimilar ? (
           <Box sx={{ px: 6 }}>
-            <Box sx={{ display: 'flex', gap: 2, overflow: 'hidden', p: 1 }}>
+            <Box sx={{ display: "flex", gap: 2, overflow: "hidden", p: 1 }}>
               {[1, 2, 3].map((index) => (
-                <Box
-                  key={index}
-                  sx={{ minWidth: 250, flex: 1 }}
-                >
+                <Box key={index} sx={{ minWidth: 250, flex: 1 }}>
                   <CardSkeleton index={index} />
                 </Box>
               ))}
