@@ -7,8 +7,6 @@
 - [ ] **Add Order (Admin)**: Permitir a admins crear órdenes manualmente para usuarios
 - [ ] **Admin navigation**: Reemplazar botones de admin en navbar por una navegación dedicada/sidebar
 - [ ] **Cart Admin View**: Corregir y mejorar la vista de administración de todos los carritos
-- [ ] **Categorías en dropdown**: Corregir jerarquía
-- [ ] **Agregar field delivery date a orden**: Permitir al admin setear delivery date en la orden del usuario.
 - [ ] **Barra de navegación responsive**: Agregar favoritos, ordenes y mi cuenta en un dropdown para que entre la navbar en mobile.
 - [ ] **Ocultar IDs donde sea posible reales** i.e order ids, product ids, ...
 - [ ] **Monto mínimo de compra**: backend y frontend.
@@ -24,7 +22,6 @@
 
 ### Catálogo y Productos
 
-- [ ] **Filtro de categorías jerárquico**: Permitir drill-down por categorías con hijos (revisar funcionamiento)
 - [ ] **Productos similares**: Vista de productos relacionados en cart
 - [ ] **Filtro de categorías**: Cuando está seteado por URL no se puede filtrar.
 - [ ] **Comparador de productos**: Permitir comparar múltiples productos lado a lado
@@ -50,7 +47,7 @@
 
 ### Backend & Frontend Integration
 
-- [ ] **Lógica de promociones**: Sistema de cupones, descuentos y promociones
+- [ ] **Lógica de promociones**: Sistema de cupones
 - [ ] **Lógica de envíos**: Cálculo de costos por zona/peso
 - [ ] **Stock reservado**: Reservar stock temporalmente durante el checkout (opcional)
 - [ ] **Notificaciones de bajo stock**: Alertas cuando productos están por agotarse
@@ -62,7 +59,6 @@
 - [ ] **Reportes exportables**: Excel/PDF de ventas por período
 - [ ] **Analytics integration**: Google Analytics o similar
 - [ ] **Audit log**: Registro de todas las acciones de admin
-- [ ] **User management**: CRUD de usuarios
 
 ### User Features
 
@@ -74,7 +70,6 @@
 
 ### UI/UX Enhancements
 
-- [ ] **Menú con categorías anidadas**: Mega menú en navbar con categorías jerárquicas
 - [ ] **Dark mode**: Tema oscuro completo
 - [ ] **Responsive tables**: Mejorar tablas en móvil (cards colapsables)
 - [ ] **Image zoom**: Zoom de imágenes de productos
@@ -123,7 +118,6 @@
 
 ## 🐛 Bugs & Fixes Conocidos
 
-- [ ] **ProductsPage**: Revisar filtrado de categorías
 - [ ] **Sorting en tablas paginadas**: El sorting actual solo ordena la página visible, no todas
 
 ## 📝 Notas de Implementación
@@ -138,4 +132,4 @@
 
 ---
 
-**Última actualización**: 16 de diciembre de 2025
+**Última actualización**: 18 de diciembre de 2025
