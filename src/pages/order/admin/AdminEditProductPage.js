@@ -20,8 +20,8 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import productService from "../../services/productService";
-import { useForm } from "../../hooks";
+import productService from "../../../services/productService";
+import { useForm } from "../../../hooks";
 
 /**
  * Admin page to edit product details

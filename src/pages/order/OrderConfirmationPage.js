@@ -14,9 +14,9 @@ import {
   CloudUpload as UploadIcon,
 } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
-import { useStore } from "../contexts/StoreContext";
-import orderService from "../services/orderService";
-import { BankingInformation } from "../components";
+import { useStore } from "../../contexts/StoreContext";
+import orderService from "../../services/orderService";
+import { BankingInformation } from "../../components";
 
 /**
  * Order confirmation page with payment instructions

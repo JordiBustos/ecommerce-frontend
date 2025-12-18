@@ -33,8 +33,8 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import { DataTable, PageHeader, FilterPanel } from "../../components";
-import productService from "../../services/productService";
+import { DataTable, PageHeader, FilterPanel } from "../../../components";
+import productService from "../../../services/productService";
 
 /**
  * Admin page to view all products

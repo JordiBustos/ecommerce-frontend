@@ -26,12 +26,12 @@ import {
   Add as AddIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../contexts/CartContext";
-import { useAuth } from "../contexts/AuthContext";
+import { useCart } from "../../contexts/CartContext";
+import { useAuth } from "../../contexts/AuthContext";
 import { useSnackbar } from "notistack";
-import userService from "../services/userService";
-import storeService from "../services/storeService";
-import orderService from "../services/orderService";
+import userService from "../../services/userService";
+import storeService from "../../services/storeService";
+import orderService from "../../services/orderService";
 
 /**
  * Checkout page component

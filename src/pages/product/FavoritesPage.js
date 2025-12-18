@@ -2,13 +2,13 @@ import { useEffect, useState, useCallback } from "react";
 import { Container, Grid, Typography, Alert, Button } from "@mui/material";
 import { FavoriteBorder as FavoriteIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useFavorites } from "../contexts/FavoritesContext";
-import { useCart } from "../contexts/CartContext";
-import { useAuth } from "../contexts/AuthContext";
-import ProductCard from "../components/ProductCard";
+import { useFavorites } from "../../contexts/FavoritesContext";
+import { useCart } from "../../contexts/CartContext";
+import { useAuth } from "../../contexts/AuthContext";
+import ProductCard from "../../components/ProductCard";
 import { useSnackbar } from "notistack";
-import productService from "../services/productService";
-import { EmptyState, LoadingState } from "../components";
+import productService from "../../services/productService";
+import { EmptyState, LoadingState } from "../../components";
 
 /**
  * Favorites page component

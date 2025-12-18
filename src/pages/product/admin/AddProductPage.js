@@ -18,8 +18,8 @@ import {
 import { ArrowBack as ArrowBackIcon, SaveOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import productService from "../../services/productService";
-import { useForm } from "../../hooks";
+import productService from "../../../services/productService";
+import { useForm } from "../../../hooks";
 
 /**
  * Page for adding a new product

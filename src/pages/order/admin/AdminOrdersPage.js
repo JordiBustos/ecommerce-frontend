@@ -23,8 +23,8 @@ import {
   PageHeader,
   StatusChip,
   FilterPanel,
-} from "../../components";
-import apiClient from "../../services/api";
+} from "../../../components";
+import apiClient from "../../../services/api";
 
 /**
  * Admin page to view all orders

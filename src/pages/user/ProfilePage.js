@@ -26,17 +26,17 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 import { useSnackbar } from "notistack";
-import addressService from "../services/addressService";
-import newsletterService from "../services/newsletterService";
+import addressService from "../../services/addressService";
+import newsletterService from "../../services/newsletterService";
 import {
   validateEmail,
   validatePhone,
   validateDNI,
   validatePostalCode,
   parseAPIError,
-} from "../utils/security";
+} from "../../utils/security";
 
 /**
  * Profile page component

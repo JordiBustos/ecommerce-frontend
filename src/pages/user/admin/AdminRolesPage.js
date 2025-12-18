@@ -20,8 +20,8 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
-import { DataTable, PageHeader } from "../../components";
-import roleService from "../../services/roleService";
+import { DataTable, PageHeader } from "../../../components";
+import roleService from "../../../services/roleService";
 
 /**
  * Admin page to manage roles

@@ -25,10 +25,10 @@ import {
   ExpandLess as ExpandLessIcon,
 } from "@mui/icons-material";
 import { useSearchParams } from "react-router-dom";
-import productService from "../services/productService";
-import { useCart } from "../contexts/CartContext";
-import ProductCard from "../components/ProductCard";
-import { SidebarSkeleton, CardSkeleton } from "../components/ProductsSkeletons.js";
+import productService from "../../services/productService.js";
+import { useCart } from "../../contexts/CartContext.js";
+import ProductCard from "../../components/ProductCard.js";
+import { SidebarSkeleton, CardSkeleton } from "../../components/ProductsSkeletons.js";
 import { useSnackbar } from "notistack";
 
 /**

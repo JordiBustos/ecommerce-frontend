@@ -29,8 +29,8 @@ import {
   ChevronRight as ChevronRightIcon,
 } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
-import { PageHeader } from "../../components";
-import productService from "../../services/productService";
+import { PageHeader } from "../../../components";
+import productService from "../../../services/productService";
 
 /**
  * Admin page to manage categories with hierarchical tree view

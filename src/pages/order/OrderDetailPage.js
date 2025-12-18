@@ -34,11 +34,11 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import orderService from "../services/orderService";
-import productService from "../services/productService";
-import config from "../config";
-import { useStore } from "../contexts/StoreContext";
-import { BankingInformation } from "../components";
+import orderService from "../../services/orderService";
+import productService from "../../services/productService";
+import config from "../../config";
+import { useStore } from "../../contexts/StoreContext";
+import { BankingInformation } from "../../components";
 
 /**
  * Order detail page component

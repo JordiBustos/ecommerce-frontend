@@ -19,8 +19,8 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
-import { DataTable, PageHeader } from "../../components";
-import productService from "../../services/productService";
+import { DataTable, PageHeader } from "../../../components";
+import productService from "../../../services/productService";
 
 /**
  * Admin page to manage brands

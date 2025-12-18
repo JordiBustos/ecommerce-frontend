@@ -22,26 +22,24 @@ import {
   Add as AddIcon,
   ExpandMore as ExpandMoreIcon,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import {
   DataTable,
   PageHeader,
   StatusChip,
   FilterPanel,
-} from "../../components";
-import PriceListDialog from "../../components/admin/PriceListDialog";
-import AddItemDialog from "../../components/admin/AddItemDialog";
-import EditItemDialog from "../../components/admin/EditItemDialog";
-import PriceListItemsTable from "../../components/admin/PriceListItemsTable";
-import priceListService from "../../services/priceListService";
-import productService from "../../services/productService";
+} from "../../../components";
+import PriceListDialog from "../../../components/admin/PriceListDialog";
+import AddItemDialog from "../../../components/admin/AddItemDialog";
+import EditItemDialog from "../../../components/admin/EditItemDialog";
+import PriceListItemsTable from "../../../components/admin/PriceListItemsTable";
+import priceListService from "../../../services/priceListService";
+import productService from "../../../services/productService";
 
 /**
  * Admin page to manage price lists
  */
 const AdminPriceListsPage = () => {
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   // Data states

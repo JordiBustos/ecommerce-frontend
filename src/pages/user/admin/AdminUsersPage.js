@@ -28,9 +28,9 @@ import {
   Close as CloseIcon,
 } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
-import { DataTable, PageHeader, FilterPanel } from "../../components";
-import userService from "../../services/userService";
-import roleService from "../../services/roleService";
+import { DataTable, PageHeader, FilterPanel } from "../../../components";
+import userService from "../../../services/userService";
+import roleService from "../../../services/roleService";
 
 /**
  * Admin page to manage users and their roles
@@ -47,7 +47,6 @@ const AdminUsersPage = () => {
   // Dialog States
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
 
   // Form Data
@@ -138,7 +137,7 @@ const AdminUsersPage = () => {
   }, [loadUsers]);
 
   const handleOpenEditDialog = useCallback((user) => {
-    setEditingUser(user);
+    setSelectedUser(user);
     setFormData({
       full_name: user.full_name || "",
       email: user.email || "",
@@ -149,7 +148,7 @@ const AdminUsersPage = () => {
 
   const handleCloseEditDialog = useCallback(() => {
     setEditDialogOpen(false);
-    setEditingUser(null);
+    setSelectedUser(null);
     setFormData({
       full_name: "",
       email: "",
@@ -184,13 +183,7 @@ const AdminUsersPage = () => {
     } finally {
       setSubmitting(false);
     }
-  }, [
-    formData,
-    editingUser,
-    enqueueSnackbar,
-    handleCloseEditDialog,
-    loadUsers,
-  ]);
+  }, [formData, enqueueSnackbar, handleCloseEditDialog, loadUsers]);
 
   const handleOpenRoleDialog = useCallback((user) => {
     setSelectedUser(user);
@@ -209,6 +202,16 @@ const AdminUsersPage = () => {
       try {
         await roleService.assignRoleToUser(roleId, selectedUser.id);
         enqueueSnackbar("Role assigned successfully", { variant: "success" });
+        
+        // Update selectedUser with new role
+        const roleToAdd = roles.find(r => r.id === roleId);
+        if (roleToAdd) {
+          setSelectedUser(prev => ({
+            ...prev,
+            roles: [...(prev.roles || []), roleToAdd]
+          }));
+        }
+        
         loadUsers();
       } catch (err) {
         enqueueSnackbar(err.response?.data?.detail || "Failed to assign role", {
@@ -216,7 +219,7 @@ const AdminUsersPage = () => {
         });
       }
     },
-    [selectedUser, enqueueSnackbar, loadUsers]
+    [selectedUser, roles, enqueueSnackbar, loadUsers]
   );
 
   const handleRemoveRole = useCallback(
@@ -226,6 +229,13 @@ const AdminUsersPage = () => {
       try {
         await roleService.removeRoleFromUser(roleId, selectedUser.id);
         enqueueSnackbar("Role removed successfully", { variant: "success" });
+        
+        // Update selectedUser by removing the role
+        setSelectedUser(prev => ({
+          ...prev,
+          roles: (prev.roles || []).filter(r => r.id !== roleId)
+        }));
+        
         loadUsers();
       } catch (err) {
         enqueueSnackbar(err.response?.data?.detail || "Failed to remove role", {
@@ -484,9 +494,10 @@ const AdminUsersPage = () => {
             </Typography>
             <Grid container spacing={2}>
               {roles.map((role) => {
-                const userRoleIds = selectedUser && selectedUser.roles
-                  ? selectedUser.roles.map((r) => r.id)
-                  : [];
+                const userRoleIds =
+                  selectedUser && selectedUser.roles
+                    ? selectedUser.roles.map((r) => r.id)
+                    : [];
                 const hasRole = userRoleIds.includes(role.id);
 
                 return (

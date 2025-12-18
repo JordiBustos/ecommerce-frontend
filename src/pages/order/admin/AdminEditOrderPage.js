@@ -34,10 +34,10 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import orderService from "../../services/orderService";
-import productService from "../../services/productService";
-import config from "../../config";
-import { useForm } from "../../hooks";
+import orderService from "../../../services/orderService";
+import productService from "../../../services/productService";
+import config from "../../../config";
+import { useForm } from "../../../hooks";
 
 /**
  * Admin page to edit order details
