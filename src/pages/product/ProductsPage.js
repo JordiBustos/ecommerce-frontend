@@ -311,27 +311,39 @@ const ProductsPage = () => {
     const displayedBrands = showAllBrands ? brands : brands.slice(0, 5);
 
     return (
-      <Paper elevation={2} sx={{ p: 3, position: "sticky", top: 80 }}>
+      <Box sx={{ p: 0, position: "sticky", top: 100 }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            mb: 2,
+            mb: 4,
           }}
         >
-          <Typography variant="h6">Filters</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Filters
+          </Typography>
           {hasActiveFilters && (
-            <IconButton size="small" onClick={clearFilters} color="primary">
-              <ClearIcon />
-            </IconButton>
+            <Button 
+                size="small" 
+                onClick={clearFilters} 
+                sx={{ 
+                    color: "black", 
+                    textDecoration: 'underline', 
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    fontSize: '0.7rem'
+                }}
+            >
+              Clear All
+            </Button>
           )}
         </Box>
 
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{ mb: 4, borderColor: 'black' }} />
 
         {/* Categories */}
-        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 2, textTransform: 'uppercase', fontSize: '0.9rem' }}>
           Categories
         </Typography>
 
@@ -487,7 +499,7 @@ const ProductsPage = () => {
             {showAllBrands ? "Show Less" : `See All (${brands.length})`}
           </Button>
         )}
-      </Paper>
+      </Box>
     );
   };
 

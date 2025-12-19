@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import {
@@ -75,6 +75,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
 
   const handleCardClick = () => {
     navigate(`/products/${product.slug}`);
+    window.scrollTo(0, 0);
   };
 
   const handleToggleFavorite = async (e) => {
@@ -109,13 +110,14 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        borderRadius: 2,
-        boxShadow: 2,
+        borderRadius: 0,
+        boxShadow: "none",
         cursor: "pointer",
-        transition: "transform 0.2s, box-shadow 0.2s",
+        bgcolor: "transparent",
+        border: "1px solid transparent",
+        transition: "border-color 0.2s",
         "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: 4,
+          borderColor: "#e0e0e0",
         },
       }}
     >
@@ -123,30 +125,43 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
       <IconButton
         sx={{
           position: "absolute",
-          top: 8,
-          right: 8,
+          top: 12,
+          right: 12,
           zIndex: 1,
           bgcolor: "transparent",
+          color: "black",
           "&:hover": {
-            bgcolor: "white",
+            bgcolor: "transparent",
+            transform: "scale(1.1)",
           },
         }}
         onClick={handleToggleFavorite}
       >
-        {isFav ? <Favorite sx={{ color: "error.main" }} /> : <FavoriteBorder />}
+        {isFav ? (
+          <Favorite sx={{ color: "black" }} />
+        ) : (
+          <FavoriteBorder sx={{ color: "black" }} />
+        )}
       </IconButton>
 
       {/* Product Image */}
-      <CardMedia
-        component="img"
-        sx={{
-          height: compact ? 180 : 240,
-          objectFit: "cover",
-          bgcolor: "grey.200",
-        }}
-        image={product.image_url || "/placeholder.png"}
-        alt={product.name}
-      />
+      <Box sx={{ position: "relative", pt: "100%", bgcolor: "#f5f5f5", mb: 2 }}>
+        <CardMedia
+          component="img"
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            p: 2,
+            mixBlendMode: "multiply",
+          }}
+          image={product.image_url || "/placeholder.png"}
+          alt={product.name}
+        />
+      </Box>
 
       {/* Product Content */}
       <CardContent
@@ -154,23 +169,24 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
           flexGrow: 1,
           display: "flex",
           flexDirection: "column",
-          p: 2,
+          p: 1,
+          pt: 0,
         }}
       >
         {/* Product Name */}
         <Typography
-          variant="h6"
+          variant="body1"
           component="h3"
           sx={{
-            fontWeight: 600,
-            mb: 1,
-            fontSize: compact ? "0.95rem" : "1.1rem",
-            lineHeight: 1.3,
-            minHeight: compact ? "2.6em" : "2.8em",
+            fontWeight: 400,
+            mb: 0.5,
+            fontSize: "0.9rem",
+            lineHeight: 1.4,
+            textTransform: "uppercase",
+            letterSpacing: "0.5px",
             overflow: "hidden",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
           }}
         >
           {product.name}
@@ -182,12 +198,8 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
             variant="body2"
             color="text.secondary"
             sx={{
-              mb: 2,
-              overflow: "hidden",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              minHeight: "2.8em",
+              mb: 1,
+              textTransform: "capitalize",
             }}
           >
             {product.description}
@@ -195,60 +207,38 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
         )}
 
         {/* Price */}
-        <Box sx={{ mb: 1 }}>
+        <Box sx={{ mt: "auto" }}>
           {product.has_discount ? (
-            <Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                <Typography
-                  variant="h5"
-                  color="error.main"
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: compact ? "1.3rem" : "1.5rem",
-                  }}
-                >
-                  ${product.final_price?.toFixed(2)}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    textDecoration: "line-through",
-                    color: "text.secondary",
-                    fontSize: compact ? "0.9rem" : "1rem",
-                  }}
-                >
-                  ${product.price?.toFixed(2)}
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    bgcolor: "error.main",
-                    color: "white",
-                    px: 1,
-                    py: 0.3,
-                    borderRadius: 1,
-                    fontWeight: 600,
-                  }}
-                >
-                  {product.savings_percent?.toFixed(0)}% OFF
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Save ${product.savings?.toFixed(2)}
-                </Typography>
-              </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: 700,
+                  color: "error.main",
+                }}
+              >
+                ${product.final_price?.toFixed(2)}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  textDecoration: "line-through",
+                  color: "text.secondary",
+                }}
+              >
+                ${product.price?.toFixed(2)}
+              </Typography>
             </Box>
           ) : (
             <Typography
-              variant="h5"
+              variant="body1"
               color="text.primary"
               sx={{
                 fontWeight: 700,
                 fontSize: compact ? "1.3rem" : "1.5rem",
               }}
             >
-              ${product.final_price?.toFixed(2) || product.price?.toFixed(2)}
+              ${product.final_price?.toFixed(2)}
             </Typography>
           )}
         </Box>
@@ -347,7 +337,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
                 color: "white",
                 fontWeight: 600,
                 textTransform: "uppercase",
-                py: 1.2,
+                py: 0.5,
                 "&:hover": {
                   bgcolor: "primary.dark",
                 },

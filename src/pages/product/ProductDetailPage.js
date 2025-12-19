@@ -3,17 +3,11 @@ import {
   Container,
   Typography,
   Box,
-  Paper,
   Grid,
-  Chip,
   Button,
   IconButton,
   Divider,
-  Card,
-  CardContent,
-  Alert,
   Breadcrumbs,
-  Skeleton,
   Link as MuiLink,
 } from "@mui/material";
 import {
@@ -22,12 +16,6 @@ import {
   Remove as RemoveIcon,
   FavoriteBorder,
   Favorite,
-  LocalShipping as ShippingIcon,
-  Verified as VerifiedIcon,
-  Inventory as InventoryIcon,
-  Scale as ScaleIcon,
-  QrCode2 as QrCodeIcon,
-  Category as CategoryIcon,
   Storefront as StorefrontIcon,
 } from "@mui/icons-material";
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -42,16 +30,8 @@ import {
   CardSkeleton,
   ProductDetailSkeleton,
 } from "../../components/ProductsSkeletons.js";
+import ProductDetailTableRow from "../../components/ProductDetailTableRow.js";
 import { useMemo } from "react";
-
-const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
-  return new Date(dateString).toLocaleDateString("es-ES", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
 
 /**
  * Product detail page component
@@ -226,50 +206,30 @@ const ProductDetailPage = () => {
   const isInStock = isAlwaysInStock || (product.stock && product.stock > 0);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 8 }}>
       {/* Back Button */}
       <Button
         startIcon={<ArrowBackIcon />}
         onClick={() => navigate("/products")}
-        sx={{ mb: 3 }}
+        sx={{
+          mb: 4,
+          color: "black",
+          fontWeight: 700,
+          textTransform: "uppercase",
+        }}
       >
         Back to Products
       </Button>
 
-      {/* Breadcrumbs */}
-      <Breadcrumbs sx={{ mb: 3 }} aria-label="breadcrumb">
-        <MuiLink
-          component={Link}
-          to="/products"
-          underline="hover"
-          color="inherit"
-        >
-          Products
-        </MuiLink>
-        {categoryPath.map((cat) => (
-          <MuiLink
-            key={cat.id}
-            component={Link}
-            to={`/products?category=${cat.id}`}
-            underline="hover"
-            color="inherit"
-          >
-            {cat.name}
-          </MuiLink>
-        ))}
-        <Typography color="text.primary">{product.name}</Typography>
-      </Breadcrumbs>
-
-      <Grid container spacing={4}>
+      <Grid container spacing={8}>
         {/* Product Image */}
-        <Grid item xs={12} md={6}>
-          <Paper
-            elevation={3}
+        <Grid item xs={12} md={7}>
+          <Box
             sx={{
-              p: 2,
-              borderRadius: 3,
-              overflow: "hidden",
+              bgcolor: "#f5f5f5",
               position: "relative",
+              width: "100%",
+              pt: "100%", // Square aspect ratio
             }}
           >
             <Box
@@ -277,30 +237,14 @@ const ProductDetailPage = () => {
               src={product.image_url || "/placeholder.png"}
               alt={product.name}
               sx={{
-                width: "100%",
-                height: "auto",
-                maxHeight: 500,
-                objectFit: "contain",
-                borderRadius: 2,
-              }}
-            />
-
-            {/* Stock Badge */}
-            <Chip
-              icon={isInStock ? <VerifiedIcon /> : <InventoryIcon />}
-              label={
-                isAlwaysInStock
-                  ? "Always in Stock"
-                  : isInStock
-                  ? `${product.stock} in stock`
-                  : "Out of Stock"
-              }
-              color={isInStock ? "success" : "error"}
-              sx={{
                 position: "absolute",
-                top: 24,
-                left: 24,
-                fontWeight: 600,
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                p: 4,
+                mixBlendMode: "multiply",
               }}
             />
 
@@ -309,30 +253,71 @@ const ProductDetailPage = () => {
               onClick={handleToggleFavorite}
               sx={{
                 position: "absolute",
-                top: 16,
-                right: 16,
-                bgcolor: "white",
-                boxShadow: 2,
+                top: 24,
+                right: 24,
+                bgcolor: "transparent",
                 "&:hover": {
-                  bgcolor: "white",
+                  bgcolor: "transparent",
                   transform: "scale(1.1)",
                 },
               }}
             >
               {isFav ? (
-                <Favorite sx={{ color: "error.main" }} />
+                <Favorite sx={{ color: "black" }} />
               ) : (
-                <FavoriteBorder />
+                <FavoriteBorder sx={{ color: "black" }} />
               )}
             </IconButton>
-          </Paper>
+          </Box>
         </Grid>
 
         {/* Product Details */}
-        <Grid item xs={12} md={6}>
-          <Box>
+        <Grid item xs={12} md={5}>
+          <Box sx={{ position: "sticky", top: 100 }}>
+            {/* Breadcrumbs */}
+            <Breadcrumbs sx={{ mb: 2 }} aria-label="breadcrumb">
+              <MuiLink
+                component={Link}
+                to="/products"
+                underline="hover"
+                color="inherit"
+                sx={{
+                  textTransform: "uppercase",
+                  fontSize: "0.8rem",
+                  fontWeight: 600,
+                }}
+              >
+                Products
+              </MuiLink>
+              {categoryPath.map((cat) => (
+                <MuiLink
+                  key={cat.id}
+                  component={Link}
+                  to={`/products?category=${cat.id}`}
+                  underline="hover"
+                  color="inherit"
+                  sx={{
+                    textTransform: "uppercase",
+                    fontSize: "0.8rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  {cat.name}
+                </MuiLink>
+              ))}
+            </Breadcrumbs>
+
             {/* Product Name */}
-            <Typography variant="h3" gutterBottom sx={{ fontWeight: 700 }}>
+            <Typography
+              variant="h3"
+              gutterBottom
+              sx={{
+                fontWeight: 900,
+                textTransform: "uppercase",
+                lineHeight: 0.9,
+                mb: 2,
+              }}
+            >
               {product.name}
             </Typography>
 
@@ -347,38 +332,27 @@ const ProductDetailPage = () => {
             )}
 
             {/* Price */}
-            <Box sx={{ mb: 1 }}>
+            <Box sx={{ mb: 4 }}>
               {product.has_discount ? (
-                <Box>
-                  <Box
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Typography
+                    variant="h4"
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      mb: 0.5,
+                      fontWeight: 700,
+                      color: "error.main",
                     }}
                   >
-                    <Typography
-                      variant="h5"
-                      color="error.main"
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: "1.5rem",
-                      }}
-                    >
-                      ${product.final_price?.toFixed(2)}
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        textDecoration: "line-through",
-                        color: "text.secondary",
-                        fontSize: "1rem",
-                      }}
-                    >
-                      ${product.price?.toFixed(2)}
-                    </Typography>
-                  </Box>
+                    ${product.final_price?.toFixed(2)}
+                  </Typography>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      textDecoration: "line-through",
+                      color: "text.secondary",
+                    }}
+                  >
+                    ${product.price?.toFixed(2)}
+                  </Typography>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Typography
                       variant="caption"
@@ -400,20 +374,44 @@ const ProductDetailPage = () => {
                 </Box>
               ) : (
                 <Typography
-                  variant="h5"
+                  variant="h4"
                   color="text.primary"
                   sx={{
                     fontWeight: 700,
                     fontSize: "1.5rem",
                   }}
                 >
-                  $
-                  {product.final_price?.toFixed(2) || product.price?.toFixed(2)}
+                  ${product.final_price?.toFixed(2)}
                 </Typography>
               )}
             </Box>
 
-            <Divider sx={{ mb: 3 }} />
+            {/* Stock Status */}
+            <Box sx={{ mb: 4 }}>
+              {isInStock ? (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "green",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  In Stock
+                </Typography>
+              ) : (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "red",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Out of Stock
+                </Typography>
+              )}
+            </Box>
 
             {/* Description */}
             <Typography
@@ -424,243 +422,101 @@ const ProductDetailPage = () => {
               {product.description}
             </Typography>
 
-            {/* Quantity Selector */}
+            {/* Add to Cart Section */}
             {isInStock && (
-              <Box sx={{ mb: 3 }}>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 1 }}
+              <Box sx={{ mb: 4 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mb: 2,
+                    border: "1px solid #e0e0e0",
+                    width: "fit-content",
+                  }}
                 >
-                  Quantity:
-                </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      border: "2px solid",
-                      borderColor: "divider",
-                      borderRadius: 2,
-                    }}
+                  <IconButton
+                    onClick={handleDecrement}
+                    disabled={quantity <= 1}
                   >
-                    <IconButton
-                      onClick={handleDecrement}
-                      disabled={quantity <= 1}
-                    >
-                      <RemoveIcon />
-                    </IconButton>
-                    <Typography
-                      sx={{
-                        px: 3,
-                        fontWeight: 600,
-                        fontSize: "1.2rem",
-                      }}
-                    >
-                      {quantity}
-                    </Typography>
-                    <IconButton
-                      onClick={handleIncrement}
-                      disabled={
-                        (!isAlwaysInStock && quantity >= product.stock) ||
-                        (product.max_per_buy && quantity >= product.max_per_buy)
-                      }
-                    >
-                      <AddIcon />
-                    </IconButton>
-                  </Box>
-                  {product.max_per_buy && (
-                    <Typography variant="caption" color="text.secondary">
-                      Max {product.max_per_buy} per order
-                    </Typography>
-                  )}
+                    <RemoveIcon />
+                  </IconButton>
+                  <Typography sx={{ px: 2, fontWeight: 700 }}>
+                    {quantity}
+                  </Typography>
+                  <IconButton
+                    onClick={handleIncrement}
+                    disabled={
+                      (quantity >= product.stock && !isAlwaysInStock) ||
+                      quantity >= product.max_per_buy
+                    }
+                  >
+                    <AddIcon />
+                  </IconButton>
                 </Box>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  size="large"
+                  onClick={() => handleAddToCart()}
+                  sx={{
+                    bgcolor: "black",
+                    color: "white",
+                    py: 2,
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                    "&:hover": { bgcolor: "#333" },
+                  }}
+                >
+                  Add to Cart
+                </Button>
               </Box>
             )}
 
-            {/* Add to Cart Button */}
-            <Button
-              variant="contained"
-              size="large"
-              fullWidth
-              onClick={handleAddToCart}
-              disabled={!isInStock}
-              sx={{
-                py: 1.5,
-                fontSize: "1.1rem",
-                fontWeight: 600,
-                borderRadius: 2,
-                mb: 3,
-              }}
+            <Divider sx={{ my: 4 }} />
+
+            {/* Description */}
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, textTransform: "uppercase", mb: 2 }}
             >
-              {isInStock ? "Add to Cart" : "Out of Stock"}
-            </Button>
-
-            {/* TODO: Make this value configurable -- Shipping Info */}
-            <Alert
-              icon={<ShippingIcon />}
-              severity="info"
-              sx={{ mb: 3, borderRadius: 2 }}
+              Description
+            </Typography>
+            <Typography
+              variant="body1"
+              paragraph
+              sx={{ lineHeight: 1.8, color: "#555" }}
             >
-              Free shipping on orders over $50
-            </Alert>
+              {product.description}
+            </Typography>
 
-            {/* Product Specifications */}
-            <Card variant="outlined" sx={{ borderRadius: 2 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                  Product Specifications
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-
-                <Grid container spacing={2}>
-                  {/* SKU */}
-                  {product.sku && (
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <QrCodeIcon sx={{ color: "text.secondary" }} />
-                        <Typography variant="body2" color="text.secondary">
-                          SKU:
-                        </Typography>
-                        {loading ? (
-                          <Skeleton variant="text" width={80} />
-                        ) : (
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {product.sku}
-                          </Typography>
-                        )}
-                      </Box>
-                    </Grid>
-                  )}
-
-                  {/* EAN */}
-                  {product.ean && (
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <QrCodeIcon sx={{ color: "text.secondary" }} />
-                        <Typography variant="body2" color="text.secondary">
-                          EAN:
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {product.ean}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  )}
-
-                  {/* Weight */}
-                  {product.weight && (
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <ScaleIcon sx={{ color: "text.secondary" }} />
-                        <Typography variant="body2" color="text.secondary">
-                          Weight:
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {product.weight} kg
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  )}
-
-                  {/* Units per Package */}
-                  {product.units_per_package && (
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <InventoryIcon sx={{ color: "text.secondary" }} />
-                        <Typography variant="body2" color="text.secondary">
-                          Units per Package:
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {product.units_per_package}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  )}
-
-                  {/* Category */}
-                  {product.category && (
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <CategoryIcon sx={{ color: "text.secondary" }} />
-                        <Typography variant="body2" color="text.secondary">
-                          Category:
-                        </Typography>
-                        <Chip
-                          label={product.category.name}
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                          component={Link}
-                          to={`/products?category=${product.category.id}`}
-                          clickable
-                        />
-                      </Box>
-                    </Grid>
-                  )}
-
-                  {/* Created Date */}
-                  <Grid item xs={12}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        Added on:
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {formatDate(product.created_at)}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-
-            {/* Brand Details */}
-            {product.brand && product.brand.description && (
-              <Card variant="outlined" sx={{ borderRadius: 2, mt: 3 }}>
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 2,
-                      mb: 2,
-                    }}
-                  >
-                    {product.brand.logo_url && (
-                      <Box
-                        component="img"
-                        src={product.brand.logo_url}
-                        alt={product.brand.name}
-                        sx={{
-                          width: 60,
-                          height: 60,
-                          objectFit: "contain",
-                        }}
-                      />
-                    )}
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        About {product.brand.name}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Divider sx={{ mb: 2 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    {product.brand.description}
-                  </Typography>
-                </CardContent>
-              </Card>
-            )}
+            {/* Additional Info */}
+            <Box sx={{ mt: 4 }}>
+              {product.brand && (
+                <ProductDetailTableRow
+                  label={"Brand"}
+                  value={product.brand.name}
+                />
+              )}
+              {product.weight && (
+                <ProductDetailTableRow
+                  label={"Weight"}
+                  value={`${product.weight} kg`}
+                />
+              )}
+              {product.unit_per_package && (
+                <ProductDetailTableRow
+                  label={"Units per Package"}
+                  value={product.unit_per_package}
+                />
+              )}
+              {product.sku && (
+                <ProductDetailTableRow label={"SKU"} value={product.sku} />
+              )}
+              {product.ean && (
+                <ProductDetailTableRow label={"EAN"} value={product.ean} />
+              )}
+            </Box>
           </Box>
         </Grid>
       </Grid>

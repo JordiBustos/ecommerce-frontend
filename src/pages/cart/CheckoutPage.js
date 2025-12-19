@@ -3,8 +3,6 @@ import {
   Container,
   Box,
   Typography,
-  Card,
-  CardContent,
   Grid,
   Button,
   TextField,
@@ -329,50 +327,47 @@ const CheckoutPage = () => {
 
   if (loading) {
     return (
-      <Container sx={{ py: 4, display: "flex", justifyContent: "center" }}>
-        <CircularProgress />
+      <Container sx={{ py: 8, display: "flex", justifyContent: "center" }}>
+        <CircularProgress sx={{ color: 'black' }} />
       </Container>
     );
   }
 
   return (
-    <Container sx={{ py: 4 }}>
-      <Typography variant="h3" gutterBottom>
+    <Container maxWidth="xl" sx={{ py: 8 }}>
+      <Typography variant="h3" gutterBottom sx={{ fontWeight: 900, textTransform: 'uppercase', mb: 6 }}>
         Checkout
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={8}>
         {/* Left Column - Checkout Form */}
         <Grid item xs={12} md={7}>
           {/* 1. Personal Data */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
+          <Box sx={{ mb: 6, border: '1px solid #e0e0e0', p: 4 }}>
               <Box
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
-                mb={2}
+                mb={4}
               >
-                <Typography variant="h6">1. Personal Information</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>1. Personal Information</Typography>
               </Box>
               <Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                   <strong>Email:</strong> {user?.email || "N/A"}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                   <strong>Full Name:</strong> {user?.full_name || "N/A"}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   <strong>Phone:</strong> {user?.phone_number || "N/A"}
                 </Typography>
               </Box>
-            </CardContent>
-          </Card>
+          </Box>
 
           {/* 2. Delivery Method */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
+          <Box sx={{ mb: 6, border: '1px solid #e0e0e0', p: 4 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, textTransform: 'uppercase', mb: 4 }}>
                 2. Delivery Method
               </Typography>
 
@@ -382,6 +377,18 @@ const CheckoutPage = () => {
                   onClick={() => setDeliveryMethod("home")}
                   startIcon={<LocalShipping />}
                   fullWidth
+                  sx={{ 
+                    py: 2, 
+                    fontWeight: 700, 
+                    textTransform: 'uppercase',
+                    bgcolor: deliveryMethod === "home" ? 'black' : 'transparent',
+                    color: deliveryMethod === "home" ? 'white' : 'black',
+                    borderColor: 'black',
+                    '&:hover': {
+                        bgcolor: deliveryMethod === "home" ? '#333' : '#f5f5f5',
+                        borderColor: 'black'
+                    }
+                  }}
                 >
                   Home Delivery
                 </Button>
@@ -392,34 +399,47 @@ const CheckoutPage = () => {
                   onClick={() => setDeliveryMethod("pickup")}
                   startIcon={<StoreIcon />}
                   fullWidth
+                  sx={{ 
+                    py: 2, 
+                    fontWeight: 700, 
+                    textTransform: 'uppercase',
+                    bgcolor: deliveryMethod === "pickup" ? 'black' : 'transparent',
+                    color: deliveryMethod === "pickup" ? 'white' : 'black',
+                    borderColor: 'black',
+                    '&:hover': {
+                        bgcolor: deliveryMethod === "pickup" ? '#333' : '#f5f5f5',
+                        borderColor: 'black'
+                    }
+                  }}
                 >
-                  Store Pickup / Drive
+                  Store Pickup
                 </Button>
               </Box>
 
               {/* Delivery Address Selection */}
               {deliveryMethod === "home" && (
-                <Box mt={3}>
+                <Box mt={4}>
                   <Box
                     display="flex"
                     justifyContent="space-between"
                     alignItems="center"
                     mb={2}
                   >
-                    <Typography variant="subtitle1">
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
                       Delivery Address
                     </Typography>
                     <Button
                       size="small"
-                      variant="outlined"
+                      variant="text"
                       startIcon={<AddIcon />}
                       onClick={handleOpenAddressDialog}
+                      sx={{ color: 'black', fontWeight: 600, textTransform: 'uppercase' }}
                     >
                       New Address
                     </Button>
                   </Box>
                   {addresses.length === 0 ? (
-                    <Alert severity="info">
+                    <Alert severity="info" sx={{ borderRadius: 0 }}>
                       You have no saved addresses. Click "New Address" to add
                       one.
                     </Alert>
@@ -430,6 +450,7 @@ const CheckoutPage = () => {
                         value={selectedAddressId}
                         onChange={(e) => setSelectedAddressId(e.target.value)}
                         label="Select an address"
+                        sx={{ borderRadius: 0 }}
                       >
                         {addresses.map((address) => (
                           <MenuItem key={address.id} value={address.id}>
@@ -442,7 +463,7 @@ const CheckoutPage = () => {
                   )}
 
                   {selectedAddressId && (
-                    <Box mt={2} p={2} bgcolor="grey.50" borderRadius={1}>
+                    <Box mt={2} p={2} bgcolor="#f9f9f9" border="1px solid #eee">
                       {(() => {
                         const addr = addresses.find(
                           (a) => a.id === selectedAddressId
@@ -478,24 +499,17 @@ const CheckoutPage = () => {
                       })()}
                     </Box>
                   )}
-
-                  <Box mt={2}>
-                    <Typography variant="body2" color="text.secondary">
-                      Shipping Method
-                    </Typography>
-                    <Typography variant="body2">--</Typography>
-                  </Box>
                 </Box>
               )}
 
               {/* Store Pickup Selection */}
               {deliveryMethod === "pickup" && (
-                <Box mt={3}>
-                  <Typography variant="subtitle1" gutterBottom>
+                <Box mt={4}>
+                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
                     Select Store
                   </Typography>
                   {physicalStores.length === 0 ? (
-                    <Alert severity="info">
+                    <Alert severity="info" sx={{ borderRadius: 0 }}>
                       No physical stores available for pickup.
                     </Alert>
                   ) : (
@@ -506,6 +520,7 @@ const CheckoutPage = () => {
                           value={selectedStoreId}
                           onChange={(e) => setSelectedStoreId(e.target.value)}
                           label="Select store"
+                          sx={{ borderRadius: 0 }}
                         >
                           {physicalStores.map((store) => (
                             <MenuItem key={store.id} value={store.id}>
@@ -516,7 +531,7 @@ const CheckoutPage = () => {
                       </FormControl>
 
                       {selectedStoreId && (
-                        <Box mt={2} p={2} bgcolor="grey.50" borderRadius={1}>
+                        <Box mt={2} p={2} bgcolor="#f9f9f9" border="1px solid #eee">
                           {(() => {
                             const store = physicalStores.find(
                               (s) => s.id === selectedStoreId
@@ -556,40 +571,37 @@ const CheckoutPage = () => {
                     variant="caption"
                     color="text.secondary"
                     display="block"
-                    mt={1}
+                    mt={2}
                   >
                     Changing the delivery method may affect the final cost and
                     product availability.
                   </Typography>
                 </Box>
               )}
-            </CardContent>
-          </Card>
+          </Box>
 
           {/* 3. Payment Method */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
+          <Box sx={{ mb: 6, border: '1px solid #e0e0e0', p: 4 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, textTransform: 'uppercase', mb: 2 }}>
                 3. Payment Method
               </Typography>
-              <Alert severity="info">
+              <Alert severity="info" sx={{ borderRadius: 0 }}>
                 Payments are accepted exclusively via bank transfer. Please
                 remember that payment must be made within 48 hours of placing
                 your order for it to be processed and shipped.
               </Alert>
-            </CardContent>
-          </Card>
+          </Box>
 
           {/* Additional Options */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
+          <Box sx={{ mb: 6, border: '1px solid #e0e0e0', p: 4 }}>
               <TextField
                 fullWidth
                 label="Replacement Criterion"
                 value={replacementCriterion}
                 onChange={(e) => setReplacementCriterion(e.target.value)}
                 placeholder="If a product is not available..."
-                sx={{ mb: 2 }}
+                sx={{ mb: 4 }}
+                variant="outlined"
               />
               <TextField
                 fullWidth
@@ -599,9 +611,9 @@ const CheckoutPage = () => {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Additional comments..."
+                variant="outlined"
               />
-            </CardContent>
-          </Card>
+          </Box>
 
           {/* Confirm Button */}
           <Button
@@ -614,20 +626,27 @@ const CheckoutPage = () => {
               (deliveryMethod === "home" && !selectedAddressId) ||
               (deliveryMethod === "pickup" && !selectedStoreId)
             }
+            sx={{ 
+                bgcolor: 'black', 
+                color: 'white', 
+                py: 2, 
+                fontWeight: 900, 
+                textTransform: 'uppercase',
+                '&:hover': { bgcolor: '#333' }
+            }}
           >
-            {submitting ? <CircularProgress size={24} /> : "CONFIRM ORDER"}
+            {submitting ? <CircularProgress size={24} sx={{ color: 'white' }} /> : "CONFIRM ORDER"}
           </Button>
         </Grid>
 
         {/* Right Column - Order Summary */}
         <Grid item xs={12} md={5}>
-          <Card sx={{ position: "sticky", top: 80 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
+          <Box sx={{ position: "sticky", top: 100, bgcolor: '#f5f5f5', p: 4 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 900, textTransform: 'uppercase', mb: 4 }}>
                 Order Summary
               </Typography>
 
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 2, borderColor: 'black' }} />
 
               {/* Products */}
               {cart?.items?.map((item) => (
@@ -639,34 +658,35 @@ const CheckoutPage = () => {
                     sx={{
                       width: 60,
                       height: 60,
-                      objectFit: "cover",
-                      borderRadius: 1,
+                      objectFit: "contain",
+                      bgcolor: 'white',
+                      p: 0.5
                     }}
                   />
                   <Box flex={1}>
-                    <Typography variant="body2" fontWeight="bold">
+                    <Typography variant="body2" fontWeight="bold" sx={{ textTransform: 'uppercase' }}>
                       {item.product?.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Quantity: {item.quantity}
+                      Qty: {item.quantity}
                     </Typography>
-                    <Typography variant="body2" color="primary">
+                    <Typography variant="body2" fontWeight="bold">
                       ${((item.product?.price || 0) * item.quantity).toFixed(2)}
                     </Typography>
                   </Box>
                 </Box>
               ))}
 
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 4, borderColor: '#ddd' }} />
 
               {/* Coupon Section */}
               {!appliedCoupon ? (
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 4 }}>
                   <Box display="flex" gap={1} alignItems="flex-start">
                     <TextField
                       size="small"
                       fullWidth
-                      placeholder="Enter coupon code"
+                      placeholder="ENTER COUPON CODE"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                       onKeyPress={(e) => {
@@ -677,15 +697,16 @@ const CheckoutPage = () => {
                       disabled={validatingCoupon}
                       InputProps={{
                         startAdornment: <CouponIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                        sx: { borderRadius: 0 }
                       }}
                     />
                     <Button
                       variant="outlined"
                       onClick={handleApplyCoupon}
                       disabled={validatingCoupon || !couponCode.trim()}
-                      sx={{ minWidth: 80, whiteSpace: 'nowrap' }}
+                      sx={{ minWidth: 80, whiteSpace: 'nowrap', borderRadius: 0, borderColor: 'black', color: 'black', fontWeight: 700 }}
                     >
-                      {validatingCoupon ? <CircularProgress size={20} /> : 'Apply'}
+                      {validatingCoupon ? <CircularProgress size={20} /> : 'APPLY'}
                     </Button>
                   </Box>
                 </Box>
@@ -693,7 +714,7 @@ const CheckoutPage = () => {
                 <Alert
                   severity="success"
                   onClose={handleRemoveCoupon}
-                  sx={{ mb: 2 }}
+                  sx={{ mb: 4, borderRadius: 0 }}
                   icon={<CouponIcon />}
                 >
                   <Typography variant="body2" fontWeight="bold">
@@ -707,40 +728,39 @@ const CheckoutPage = () => {
 
               {/* Pricing */}
               <Box display="flex" justifyContent="space-between" mb={1}>
-                <Typography variant="body2">Subtotal:</Typography>
-                <Typography variant="body2">${subtotal.toFixed(2)}</Typography>
+                <Typography variant="body2" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Subtotal</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>${subtotal.toFixed(2)}</Typography>
               </Box>
 
               <Box display="flex" justifyContent="space-between" mb={1}>
-                <Typography variant="body2">Shipping:</Typography>
-                <Typography variant="body2">
+                <Typography variant="body2" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Shipping</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   ${shippingCost.toFixed(2)}
                 </Typography>
               </Box>
 
               {appliedCoupon && (
                 <Box display="flex" justifyContent="space-between" mb={1}>
-                  <Typography variant="body2" color="success.main">
+                  <Typography variant="body2" color="success.main" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>
                     Discount ({appliedCoupon.discount_type === 'percentage' 
                       ? `${appliedCoupon.discount_value}%` 
-                      : `$${appliedCoupon.discount_value}`}):
+                      : `$${appliedCoupon.discount_value}`})
                   </Typography>
-                  <Typography variant="body2" color="success.main">
+                  <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>
                     -${discountAmount.toFixed(2)}
                   </Typography>
                 </Box>
               )}
 
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 4, borderColor: 'black' }} />
 
               <Box display="flex" justifyContent="space-between">
-                <Typography variant="h6">Total:</Typography>
-                <Typography variant="h6" color="primary">
+                <Typography variant="h6" sx={{ textTransform: 'uppercase', fontWeight: 900 }}>Total</Typography>
+                <Typography variant="h6" color="primary" sx={{ fontWeight: 900, color: 'black' }}>
                   ${total.toFixed(2)}
                 </Typography>
               </Box>
-            </CardContent>
-          </Card>
+          </Box>
         </Grid>
       </Grid>
 
@@ -750,8 +770,9 @@ const CheckoutPage = () => {
         onClose={handleCloseAddressDialog}
         maxWidth="sm"
         fullWidth
+        PaperProps={{ sx: { borderRadius: 0 } }}
       >
-        <DialogTitle>Add new address</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, textTransform: 'uppercase' }}>Add new address</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 1 }}>
             <TextField
@@ -763,6 +784,7 @@ const CheckoutPage = () => {
               }
               margin="normal"
               required
+              variant="outlined"
             />
             <TextField
               fullWidth
@@ -773,6 +795,7 @@ const CheckoutPage = () => {
               }
               margin="normal"
               required
+              variant="outlined"
             />
             <TextField
               fullWidth
@@ -782,6 +805,7 @@ const CheckoutPage = () => {
                 setNewAddress({ ...newAddress, address_line2: e.target.value })
               }
               margin="normal"
+              variant="outlined"
             />
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
@@ -794,6 +818,7 @@ const CheckoutPage = () => {
                   }
                   margin="normal"
                   required
+                  variant="outlined"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -806,6 +831,7 @@ const CheckoutPage = () => {
                   }
                   margin="normal"
                   required
+                  variant="outlined"
                 />
               </Grid>
             </Grid>
@@ -820,6 +846,7 @@ const CheckoutPage = () => {
                   }
                   margin="normal"
                   required
+                  variant="outlined"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -835,6 +862,7 @@ const CheckoutPage = () => {
                   }
                   margin="normal"
                   required
+                  variant="outlined"
                 />
               </Grid>
             </Grid>
@@ -846,12 +874,13 @@ const CheckoutPage = () => {
                 setNewAddress({ ...newAddress, phone_number: e.target.value })
               }
               margin="normal"
+              variant="outlined"
             />
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseAddressDialog}>Cancel</Button>
-          <Button onClick={handleSaveAddress} variant="contained">
+          <Button onClick={handleCloseAddressDialog} sx={{ color: 'black', fontWeight: 700 }}>Cancel</Button>
+          <Button onClick={handleSaveAddress} variant="contained" sx={{ bgcolor: 'black', color: 'white', fontWeight: 700, '&:hover': { bgcolor: '#333' } }}>
             Save
           </Button>
         </DialogActions>
@@ -863,8 +892,9 @@ const CheckoutPage = () => {
         onClose={() => setShowConfirmDialog(false)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{ sx: { borderRadius: 0 } }}
       >
-        <DialogTitle>Confirm Order</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, textTransform: 'uppercase' }}>Confirm Order</DialogTitle>
         <DialogContent>
           <Typography variant="body1" gutterBottom>
             Are you sure you want to place this order?
@@ -880,13 +910,14 @@ const CheckoutPage = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowConfirmDialog(false)}>Cancel</Button>
+          <Button onClick={() => setShowConfirmDialog(false)} sx={{ color: 'black', fontWeight: 700 }}>Cancel</Button>
           <Button
             onClick={handleConfirmOrder}
             variant="contained"
             disabled={submitting}
+            sx={{ bgcolor: 'black', color: 'white', fontWeight: 700, '&:hover': { bgcolor: '#333' } }}
           >
-            {submitting ? <CircularProgress size={20} /> : "Confirm"}
+            {submitting ? <CircularProgress size={20} sx={{ color: 'white' }} /> : "Confirm"}
           </Button>
         </DialogActions>
       </Dialog>

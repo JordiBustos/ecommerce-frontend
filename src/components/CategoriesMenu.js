@@ -65,15 +65,14 @@ const CategoriesMenu = () => {
     <>
       <Button
         color="inherit"
-        startIcon={<CategoryIcon />}
         endIcon={<ArrowDownIcon />}
         onClick={handleClick}
         sx={{
-          '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          },
+          fontWeight: 700,
+          letterSpacing: '1px',
         }}
       >
+        CATEGORIES
       </Button>
       <Menu
         anchorEl={anchorEl}

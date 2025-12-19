@@ -8,9 +8,9 @@ import { createTheme } from '@mui/material/styles';
  * @returns {import('@mui/material/styles').Theme} MUI theme
  */
 export const createAppTheme = (
-  primaryColor = '#1976d2',
-  secondaryColor = '#9c27b0',
-  accentColor = '#ff9800'
+  primaryColor = '#FF000000',
+  secondaryColor = '#FF000000',
+  accentColor = '#FF000000'
 ) => createTheme({
   palette: {
     primary: {
@@ -75,14 +75,16 @@ export const createAppTheme = (
     },
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 0,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: 'none',
-          fontWeight: 500,
+          textTransform: 'uppercase',
+          fontWeight: 700,
+          letterSpacing: '1px',
+          borderRadius: 0,
         },
         contained: {
           boxShadow: 'none',
@@ -90,12 +92,30 @@ export const createAppTheme = (
             boxShadow: 'none',
           },
         },
+        outlined: {
+          borderWidth: '1px',
+          '&:hover': {
+            borderWidth: '1px',
+          },
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ffffff',
+          color: '#000000',
+          boxShadow: 'none',
+          borderBottom: '1px solid #e0e0e0',
+        },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          boxShadow: 'none',
+          border: '1px solid #e0e0e0',
+          borderRadius: 0,
         },
       },
     },

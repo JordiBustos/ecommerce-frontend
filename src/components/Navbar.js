@@ -14,11 +14,9 @@ import {
   ListItemText,
 } from "@mui/material";
 import {
-  ShoppingCart as ShoppingCartIcon,
   AccountCircle as AccountCircleIcon,
   Favorite as FavoriteIcon,
   Receipt as ReceiptIcon,
-  AdminPanelSettings as AdminIcon,
   Inventory as InventoryIcon,
   People as PeopleIcon,
   ShoppingCartOutlined,
@@ -62,29 +60,42 @@ const Navbar = () => {
   const isAdmin = user?.is_superuser;
 
   return (
-    <AppBar position="sticky">
-      <Container maxWidth="lg">
-        <Toolbar disableGutters>
+    <AppBar
+      position="sticky"
+      color="default"
+      elevation={0}
+      sx={{ borderBottom: "1px solid #e5e5e5", bgcolor: "white" }}
+    >
+      <Container maxWidth="xl">
+        <Toolbar disableGutters sx={{ height: 80 }}>
           <Typography
-            variant="h6"
+            variant="h4"
             component="div"
-            sx={{ flexGrow: 1, cursor: "pointer" }}
+            sx={{
+              fontWeight: 900,
+              letterSpacing: "1px",
+              cursor: "pointer",
+              textTransform: "uppercase",
+              mr: 4,
+            }}
             onClick={() => navigate("/")}
           >
             {storeSettings?.store_name || config.app.name}
           </Typography>
 
-          <CategoriesMenu />
+          <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
+            <CategoriesMenu />
+          </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {isAuthenticated ? (
               <>
                 {isAdmin && (
                   <>
                     <Button
                       color="inherit"
-                      startIcon={<AdminIcon />}
                       onClick={handleAdminMenuOpen}
+                      sx={{ fontWeight: 700 }}
                     >
                       Admin
                     </Button>
@@ -100,6 +111,15 @@ const Navbar = () => {
                         vertical: "top",
                         horizontal: "right",
                       }}
+                      PaperProps={{
+                        elevation: 0,
+                        sx: {
+                          overflow: "visible",
+                          filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                          mt: 1.5,
+                          border: "1px solid #e0e0e0",
+                        },
+                      }}
                     >
                       <MenuItem
                         onClick={() => handleAdminNavigation("/admin/products")}
@@ -107,7 +127,7 @@ const Navbar = () => {
                         <ListItemIcon>
                           <InventoryIcon fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText>All Products</ListItemText>
+                        <ListItemText>Products</ListItemText>
                       </MenuItem>
                       <MenuItem
                         onClick={() => handleAdminNavigation("/admin/orders")}
@@ -115,7 +135,7 @@ const Navbar = () => {
                         <ListItemIcon>
                           <ReceiptIcon fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText>All Orders</ListItemText>
+                        <ListItemText>Orders</ListItemText>
                       </MenuItem>
                       <MenuItem
                         onClick={() => handleAdminNavigation("/admin/carts")}
@@ -123,7 +143,7 @@ const Navbar = () => {
                         <ListItemIcon>
                           <ShoppingCartOutlined fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText>All Carts</ListItemText>
+                        <ListItemText>Carts</ListItemText>
                       </MenuItem>
                       <MenuItem
                         onClick={() =>
@@ -181,18 +201,6 @@ const Navbar = () => {
                   </>
                 )}
 
-                <Button color="inherit" onClick={() => navigate("/products")}>
-                  Products
-                </Button>
-
-                <Button
-                  color="inherit"
-                  onClick={() => navigate("/orders")}
-                  startIcon={<ReceiptIcon />}
-                >
-                  Orders
-                </Button>
-
                 <IconButton
                   color="inherit"
                   onClick={() => navigate("/favorites")}
@@ -200,10 +208,8 @@ const Navbar = () => {
                   <FavoriteIcon />
                 </IconButton>
 
-                <IconButton color="inherit" onClick={() => navigate("/cart")}>
-                  <Badge badgeContent={itemCount} color="error">
-                    <ShoppingCartIcon />
-                  </Badge>
+                <IconButton color="inherit" onClick={() => navigate("/orders")}>
+                  <ReceiptIcon />
                 </IconButton>
 
                 <IconButton
@@ -213,7 +219,13 @@ const Navbar = () => {
                   <AccountCircleIcon />
                 </IconButton>
 
-                <Button color="inherit" onClick={handleLogout}>
+                <IconButton color="inherit" onClick={() => navigate("/cart")}>
+                  <Badge badgeContent={itemCount} color="primary">
+                    <ShoppingCartOutlined />
+                  </Badge>
+                </IconButton>
+
+                <Button color="inherit" onClick={handleLogout} sx={{ ml: 1 }}>
                   Logout
                 </Button>
               </>
@@ -222,7 +234,12 @@ const Navbar = () => {
                 <Button color="inherit" onClick={() => navigate("/login")}>
                   Login
                 </Button>
-                <Button color="inherit" onClick={() => navigate("/register")}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => navigate("/register")}
+                  sx={{ color: "white" }}
+                >
                   Register
                 </Button>
               </>

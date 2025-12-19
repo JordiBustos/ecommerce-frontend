@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Container,
@@ -7,8 +7,6 @@ import {
   TextField,
   Button,
   IconButton,
-  Paper,
-  Divider,
 } from '@mui/material';
 import {
   Facebook as FacebookIcon,
@@ -72,210 +70,148 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        bgcolor: 'grey.100',
+        bgcolor: 'black',
+        color: 'white',
         mt: 8,
-        pt: 6,
-        pb: 3,
+        pt: 8,
+        pb: 4,
       }}
     >
-      <Container maxWidth="lg">
-        {/* Newsletter Section */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 4,
-            mb: 6,
-            bgcolor: 'white',
-            borderRadius: 3,
-            textAlign: 'center',
-          }}
-        >
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-            Únete a la comunidad{' '}
-            <Typography component="span" variant="h5" color="primary" sx={{ fontWeight: 600 }}>
-              {storeSettings?.store_name || 'E-Commerce'}
-            </Typography>
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Suscríbete para recibir noticias sobre nuevos productos, descuentos exclusivos y guías.
-          </Typography>
-          
-          <Box
-            component="form"
-            onSubmit={handleSubscribe}
-            sx={{
-              display: 'flex',
-              gap: 2,
-              maxWidth: 500,
-              mx: 'auto',
-              flexDirection: { xs: 'column', sm: 'row' },
-            }}
-          >
-            <TextField
-              fullWidth
-              placeholder="Tu correo electrónico"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-              size="small"
-              sx={{
-                bgcolor: 'grey.100',
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { border: 'none' },
-                },
-              }}
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={loading}
-              sx={{
-                px: 4,
-                textTransform: 'uppercase',
-                fontWeight: 600,
-                bgcolor: 'primary',
-                color: 'secondary',
-                '&:hover': {
-                  bgcolor: 'warning.dark',
-                },
-              }}
-            >
-              Suscribirse
-            </Button>
-          </Box>
-        </Paper>
-
-        {/* Footer Links */}
-        <Grid container spacing={4} sx={{ mb: 4 }}>
-          {/* Brand Column */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography
-              variant="h5"
-              gutterBottom
-              sx={{ fontWeight: 700, color: 'primary' }}
-            >
-              {storeSettings?.store_name || 'E-Commerce'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              {storeSettings?.description || 'Tu destino premium para compras online'}
-            </Typography>
-            {storeSettings?.email && (
-              <Typography variant="body2" color="text.secondary">
-                {storeSettings.email}
-              </Typography>
-            )}
-            {storeSettings?.phone && (
-              <Typography variant="body2" color="text.secondary">
-                {storeSettings.phone}
-              </Typography>
-            )}
-          </Grid>
+      <Container maxWidth="xl">
+        <Grid container spacing={8}>
+            {/* Newsletter Section - Integrated */}
+            <Grid item xs={12} md={4}>
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 900, textTransform: 'uppercase', mb: 2 }}>
+                    Join our Newsletter
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 3, color: '#999' }}>
+                    Sign up for updates on new drops and special offers.
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubscribe}
+                    sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                >
+                    <TextField
+                        fullWidth
+                        placeholder="Email Address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        type="email"
+                        variant="standard"
+                        InputProps={{
+                            disableUnderline: true,
+                            sx: { 
+                                color: 'white', 
+                                borderBottom: '1px solid #555',
+                                pb: 1,
+                                fontSize: '1.1rem',
+                                '&:hover': { borderBottom: '1px solid white' },
+                                '&:focus-within': { borderBottom: '1px solid white' }
+                            }
+                        }}
+                        sx={{
+                            '& input::placeholder': { color: '#666', fontWeight: 700, textTransform: 'uppercase' }
+                        }}
+                    />
+                    <Button
+                        type="submit"
+                        disabled={loading}
+                        sx={{
+                            alignSelf: 'flex-start',
+                            color: 'white',
+                            fontWeight: 900,
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            p: 0,
+                            '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' }
+                        }}
+                        endIcon={<span>→</span>}
+                    >
+                        Sign Up
+                    </Button>
+                </Box>
+            </Grid>
 
           {/* Navigation Column */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Navega
+          <Grid item xs={6} md={2}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 900, textTransform: 'uppercase', mb: 2 }}>
+              Products
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <ScrollLink
-                to="/products"
-                variant="link"
-                color="text.secondary"
-                sx={{ textAlign: 'left' }}
-              >
-                Productos
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <ScrollLink to="/products" variant="body2" color="#999" sx={{ textAlign: 'left', '&:hover': { color: 'white' } }}>
+                All Products
               </ScrollLink>
-              <ScrollLink
-                to="/favorites"
-                variant="link"
-                color="text.secondary"
-                sx={{ textAlign: 'left' }}
-              >
-                Favoritos
+              {displayCategories.map((category) => (
+                <ScrollLink to={`/products?category=${category.id}`} key={category.id} variant="body2" color="#999" sx={{ textAlign: 'left', '&:hover': { color: 'white' } }}>
+                  {category.name}
+                </ScrollLink>
+              ))}
+            </Box>
+          </Grid>
+
+          <Grid item xs={6} md={2}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 900, textTransform: 'uppercase', mb: 2 }}>
+              Support
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <ScrollLink to="/help" variant="body2" color="#999" sx={{ textAlign: 'left', '&:hover': { color: 'white' } }}>
+                Help
               </ScrollLink>
-              <ScrollLink
-                to="/privacy-policy"
-                variant="link"
-                color="text.secondary"
-                sx={{ textAlign: 'left' }}
-              >
-                Política de privacidad
+              <ScrollLink to="/shipping-policy" variant="body2" color="#999" sx={{ textAlign: 'left', '&:hover': { color: 'white' } }}>
+                Shipping
               </ScrollLink>
-              <ScrollLink
-                to="/shipping-policy"
-                variant="link"
-                color="text.secondary"
-                sx={{ textAlign: 'left' }}
-              >
-                Política de envío
+              <ScrollLink to="/returns" variant="body2" color="#999" sx={{ textAlign: 'left', '&:hover': { color: 'white' } }}>
+                Returns
               </ScrollLink>
             </Box>
           </Grid>
 
-          {/* Categories Column */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Categorías
+          <Grid item xs={6} md={2}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 900, textTransform: 'uppercase', mb: 2 }}>
+              Company
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {Array.isArray(displayCategories) && displayCategories.length > 0 ? (
-                displayCategories.map((category) => (
-                  <ScrollLink
-                    key={category.id}
-                    to={`/products?category=${category.id}`}
-                    variant="link"
-                    color="text.secondary"
-                    sx={{ textAlign: 'left' }}
-                  >
-                    {category.name}
-                  </ScrollLink>
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Cargando...
-                </Typography>
-              )}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <ScrollLink to="/about" variant="body2" color="#999" sx={{ textAlign: 'left', '&:hover': { color: 'white' } }}>
+                About Us
+              </ScrollLink>
+              <ScrollLink to="/careers" variant="body2" color="#999" sx={{ textAlign: 'left', '&:hover': { color: 'white' } }}>
+                Careers
+              </ScrollLink>
+              <ScrollLink to="/privacy-policy" variant="body2" color="#999" sx={{ textAlign: 'left', '&:hover': { color: 'white' } }}>
+                Privacy Policy
+              </ScrollLink>
             </Box>
           </Grid>
 
-          {/* Social Media Column */}
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Síguenos
+          <Grid item xs={6} md={2}>
+             <Typography variant="h6" gutterBottom sx={{ fontWeight: 900, textTransform: 'uppercase', mb: 2 }}>
+              Follow Us
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              {socialMedia.length > 0 ? (
-                socialMedia.map((social) => (
-                  <IconButton
-                    key={social.name}
-                    component="a"
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    size="small"
-                    sx={{
-                      bgcolor: 'background.paper',
-                      '&:hover': { bgcolor: 'primary.main', color: 'white' },
-                    }}
-                  >
-                    {social.icon}
-                  </IconButton>
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Próximamente
-                </Typography>
-              )}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+                {socialMedia.map((social, index) => (
+                    <IconButton 
+                        key={index} 
+                        href={social.url} 
+                        target="_blank" 
+                        sx={{ color: 'white', p: 0, '&:hover': { color: '#999' } }}
+                    >
+                        {social.icon}
+                    </IconButton>
+                ))}
             </Box>
           </Grid>
         </Grid>
 
-        <Divider sx={{ my: 3 }} />
-
-        {/* Copyright */}
-        <Typography variant="body2" color="text.secondary" align="center">
-          © {new Date().getFullYear()} {storeSettings?.store_name || 'E-Commerce'}. Todos los derechos reservados.
-        </Typography>
+        <Box sx={{ mt: 8, pt: 4, borderTop: '1px solid #333', display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+            <Typography variant="caption" color="#666">
+                © {new Date().getFullYear()} {storeSettings?.store_name || 'E-Commerce'}. All rights reserved.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 3 }}>
+                <Typography variant="caption" color="#666" sx={{ cursor: 'pointer', '&:hover': { color: 'white' } }}>Privacy Settings</Typography>
+                <Typography variant="caption" color="#666" sx={{ cursor: 'pointer', '&:hover': { color: 'white' } }}>Terms and Conditions</Typography>
+            </Box>
+        </Box>
       </Container>
     </Box>
   );

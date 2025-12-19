@@ -1,21 +1,24 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Box,
   Typography,
   Button,
   Grid,
-  Card,
-  CardContent,
   CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { ShoppingCart, Favorite, LocalShipping } from "@mui/icons-material";
+import {
+  ShoppingCart,
+  Favorite,
+  LocalShipping,
+  ArrowForward as ArrowForwardIcon,
+} from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
 import { useCart } from "../contexts/CartContext";
 import ProductCarousel from "../components/ProductCarousel";
 import productService from "../services/productService";
-import { useSnackbar } from 'notistack';
+import { useSnackbar } from "notistack";
 
 /**
  * Home page component
@@ -37,7 +40,9 @@ const HomePage = () => {
       const data = await productService.getBestSelling();
       setBestSelling(data);
     } catch (error) {
-      enqueueSnackbar("Failed to load best selling products", { variant: 'error' });
+      enqueueSnackbar("Failed to load best selling products", {
+        variant: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -51,16 +56,16 @@ const HomePage = () => {
    * Handle add to cart from carousel
    * @param {number} productId
    */
-  const handleAddToCart = async (productId) => {
+  const handleAddToCart = async (productId, quantity) => {
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
     try {
-      await addToCart(productId, 1);
-      enqueueSnackbar('Added to cart', { variant: 'success' });
+      await addToCart(productId, quantity);
+      enqueueSnackbar("Added to cart", { variant: "success" });
     } catch (error) {
-      enqueueSnackbar("Failed to add to cart", { variant: 'error' });
+      enqueueSnackbar("Failed to add to cart", { variant: "error" });
     }
   };
 
@@ -87,131 +92,204 @@ const HomePage = () => {
       {/* Hero Section */}
       <Box
         sx={{
-          bgcolor: "primary.main",
+          bgcolor: "black",
           color: "white",
-          py: 8,
-          textAlign: "center",
+          minHeight: "85vh",
+          display: "flex",
+          alignItems: "center",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        <Container maxWidth="md">
-          <Typography variant="h2" component="h1" gutterBottom>
-            Welcome to Our Store
-          </Typography>
-          <Typography variant="h5" paragraph>
-            Discover amazing products at great prices
-          </Typography>
-          <Box sx={{ mt: 4, mb: 4 }}>
-            {isAuthenticated ? (
-              <Button
-                variant="contained"
-                color="secondary"
-                size="large"
-                onClick={() => navigate("/products")}
+        {/* Abstract background shape or image placeholder */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            opacity: 0.3,
+            background: "linear-gradient(45deg, #333 30%, #000 90%)",
+            zIndex: 0,
+          }}
+        />
+
+        <Container maxWidth="xl" sx={{ position: "relative", zIndex: 1 }}>
+          <Grid container>
+            <Grid item xs={12} md={8} lg={6}>
+              <Typography
+                variant="h1"
+                component="h1"
+                sx={{
+                  fontWeight: 900,
+                  textTransform: "uppercase",
+                  fontSize: { xs: "3rem", md: "5rem" },
+                  lineHeight: 0.9,
+                  mb: 4,
+                }}
               >
-                Shop Now
-              </Button>
-            ) : (
-              <>
+                Impossible is Nothing
+              </Typography>
+              <Typography
+                variant="h5"
+                sx={{ mb: 6, fontWeight: 300, maxWidth: "600px" }}
+              >
+                Discover the latest collection of premium gear designed for
+                performance and style.
+              </Typography>
+
+              <Box sx={{ display: "flex", gap: 2 }}>
                 <Button
                   variant="contained"
-                  color="secondary"
                   size="large"
-                  onClick={() => navigate("/register")}
-                  sx={{ mr: 2 }}
-                >
-                  Get Started
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  size="large"
-                  onClick={() => navigate("/login")}
-                >
-                  Login
-                </Button>
-              </>
-            )}
-          </Box>
-        </Container>
-
-        {bestSelling.length > 0 && (
-          <Box sx={{ bgcolor: "grey.50", py: 8 }}>
-            <Container maxWidth="lg">
-              <Typography variant="h3" align="center" gutterBottom color={"textPrimary"}>
-                Most Selled Products
-              </Typography>
-              <Box sx={{ mt: 4 }}>
-                <ProductCarousel
-                  products={bestSelling}
-                  onAddToCart={isAuthenticated ? handleAddToCart : null}
-                />
-              </Box>
-            </Container>
-          </Box>
-        )}
-
-        {loading && (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress />
-          </Box>
-        )}
-
-        {/* Features Section */}
-        <Container sx={{ py: 8 }}>
-          <Typography variant="h3" align="center" gutterBottom>
-            Why Shop With Us
-          </Typography>
-          <Grid container spacing={4} sx={{ mt: 2 }}>
-            {features.map((feature, index) => (
-              <Grid item xs={12} md={4} key={index}>
-                <Card
+                  onClick={() => navigate("/products")}
                   sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    textAlign: "center",
-                    p: 3,
+                    bgcolor: "white",
+                    color: "black",
+                    px: 4,
+                    py: 1.5,
+                    fontSize: "1.1rem",
+                    "&:hover": { bgcolor: "#f0f0f0" },
                   }}
                 >
-                  <Box sx={{ color: "primary.main", mb: 2 }}>
-                    {feature.icon}
-                  </Box>
-                  <CardContent>
-                    <Typography variant="h5" gutterBottom>
-                      {feature.title}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                      {feature.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
+                  Shop Now
+                </Button>
+                {!isAuthenticated && (
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    onClick={() => navigate("/register")}
+                    sx={{
+                      borderColor: "white",
+                      color: "white",
+                      px: 4,
+                      py: 1.5,
+                      fontSize: "1.1rem",
+                      "&:hover": {
+                        borderColor: "white",
+                        bgcolor: "rgba(255,255,255,0.1)",
+                      },
+                    }}
+                  >
+                    Join Us
+                  </Button>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Best Sellers Section */}
+      {bestSelling.length > 0 && (
+        <Box sx={{ py: 10 }}>
+          <Container maxWidth="xl">
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 6,
+              }}
+            >
+              <Typography
+                variant="h3"
+                sx={{ fontWeight: 800, textTransform: "uppercase" }}
+              >
+                Best Sellers
+              </Typography>
+              <Button
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => navigate("/products")}
+                sx={{ color: "black", fontWeight: 700 }}
+              >
+                View All
+              </Button>
+            </Box>
+
+            <ProductCarousel
+              products={bestSelling}
+              onAddToCart={isAuthenticated ? handleAddToCart : null}
+              compact={false}
+            />
+          </Container>
+        </Box>
+      )}
+
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
+          <CircularProgress color="inherit" />
+        </Box>
+      )}
+
+      {/* Features Section - Minimalist */}
+      <Box sx={{ bgcolor: "#f5f5f5", py: 10 }}>
+        <Container maxWidth="xl">
+          <Grid container spacing={6}>
+            {features.map((feature, index) => (
+              <Grid item xs={12} md={4} key={index}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <Box sx={{ mb: 2, color: "black" }}>{feature.icon}</Box>
+                  <Typography
+                    variant="h5"
+                    gutterBottom
+                    sx={{ fontWeight: 700, textTransform: "uppercase" }}
+                  >
+                    {feature.title}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    {feature.description}
+                  </Typography>
+                </Box>
               </Grid>
             ))}
           </Grid>
         </Container>
+      </Box>
 
-        {/* CTA Section */}
-        <Box sx={{ bgcolor: "background.paper", py: 6 }}>
-          <Container maxWidth="md" sx={{ textAlign: "center" }}>
-            <Typography variant="h4" gutterBottom>
-              Ready to start shopping?
-            </Typography>
-            <Typography variant="body1" color="text.secondary" paragraph>
-              Join thousands of satisfied customers today
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                navigate(isAuthenticated ? "/products" : "/register");
-              }}
-            >
-              {isAuthenticated ? "Browse Products" : "Sign Up Now"}
-            </Button>
-          </Container>
-        </Box>
+      {/* CTA Section */}
+      <Box
+        sx={{ bgcolor: "black", color: "white", py: 10, textAlign: "center" }}
+      >
+        <Container maxWidth="md">
+          <Typography
+            variant="h3"
+            gutterBottom
+            sx={{ fontWeight: 900, textTransform: "uppercase" }}
+          >
+            Join the Club
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{ mb: 4, fontWeight: 300, color: "#ccc" }}
+          >
+            Get exclusive access to new drops and special offers.
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              navigate(isAuthenticated ? "/products" : "/register");
+            }}
+            sx={{
+              bgcolor: "white",
+              color: "black",
+              px: 6,
+              py: 1.5,
+              "&:hover": { bgcolor: "#f0f0f0" },
+            }}
+          >
+            {isAuthenticated ? "Start Shopping" : "Sign Up for Free"}
+          </Button>
+        </Container>
       </Box>
     </Box>
   );
