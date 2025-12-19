@@ -333,8 +333,16 @@ const OrderDetailPage = () => {
                     <CommentIcon sx={{ mr: 1, color: "text.secondary" }} />
                     <Typography variant="h6">Comments</Typography>
                   </Box>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    {order.comment || "-"}
+                  </Typography>
+
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                    <CommentIcon sx={{ mr: 1, color: "text.secondary" }} />
+                    <Typography variant="h6">Replacement criterion</Typography>
+                  </Box>
                   <Typography variant="body2" color="text.secondary">
-                    {order.comments || "-"}
+                    {order.replacement_criterion || "-"}
                   </Typography>
 
                   {order.receipts && order.receipts.length > 0 && (
