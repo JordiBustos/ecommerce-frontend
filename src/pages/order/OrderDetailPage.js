@@ -34,11 +34,11 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import orderService from "../services/orderService";
-import productService from "../services/productService";
-import config from "../config";
-import { useStore } from "../contexts/StoreContext";
-import { BankingInformation } from "../components";
+import orderService from "../../services/orderService";
+import productService from "../../services/productService";
+import config from "../../config";
+import { useStore } from "../../contexts/StoreContext";
+import { BankingInformation } from "../../components";
 
 /**
  * Order detail page component
@@ -70,8 +70,8 @@ const OrderDetailPage = () => {
         const itemsWithProducts = await Promise.all(
           data.items.map(async (item) => {
             try {
-              const product = await productService.getProductById(
-                item.product_id
+              const product = await productService.getProductBySlug(
+                item.product_slug
               );
               return {
                 ...item,
@@ -79,7 +79,7 @@ const OrderDetailPage = () => {
               };
             } catch (error) {
               console.error(
-                `Failed to load product ${item.product_id}:`,
+                `Failed to load product ${item.product_slug}:`,
                 error
               );
               return {
@@ -257,6 +257,16 @@ const OrderDetailPage = () => {
                   </Box>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
+                      Estimated Delivery Date
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {order.estimated_delivery_date
+                        ? formatDate(order.estimated_delivery_date)
+                        : "Not specified"}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
                       Delivery Date
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 500 }}>
@@ -323,8 +333,16 @@ const OrderDetailPage = () => {
                     <CommentIcon sx={{ mr: 1, color: "text.secondary" }} />
                     <Typography variant="h6">Comments</Typography>
                   </Box>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    {order.comment || "-"}
+                  </Typography>
+
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                    <CommentIcon sx={{ mr: 1, color: "text.secondary" }} />
+                    <Typography variant="h6">Replacement criterion</Typography>
+                  </Box>
                   <Typography variant="body2" color="text.secondary">
-                    {order.comments || "-"}
+                    {order.replacement_criterion || "-"}
                   </Typography>
 
                   {order.receipts && order.receipts.length > 0 && (
@@ -484,6 +502,22 @@ const OrderDetailPage = () => {
                       </Typography>
                     </Box>
                   )}
+                  {order.coupon_code && order.discount_amount && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
+                      <Typography variant="body1" color="success.main">
+                        Discount ({order.coupon_code}):
+                      </Typography>
+                      <Typography variant="body1" color="success.main">
+                        -${order.discount_amount.toFixed(2)}
+                      </Typography>
+                    </Box>
+                  )}
                   <Divider sx={{ my: 2 }} />
                   <Box
                     sx={{ display: "flex", justifyContent: "space-between" }}
@@ -496,7 +530,7 @@ const OrderDetailPage = () => {
                       sx={{ fontWeight: 700, color: "primary.main" }}
                     >
                       $
-                      {order.total?.toFixed(2) ||
+                      {order.total_amount?.toFixed(2) ||
                         calculateSubtotal().toFixed(2)}
                     </Typography>
                   </Box>

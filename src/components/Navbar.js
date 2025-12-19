@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -20,13 +20,16 @@ import {
   Receipt as ReceiptIcon,
   AdminPanelSettings as AdminIcon,
   Inventory as InventoryIcon,
+  People as PeopleIcon,
   ShoppingCartOutlined,
+  LocalOffer as CouponIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useCart } from "../contexts/CartContext";
 import { useStore } from "../contexts/StoreContext";
 import config from "../config";
+import CategoriesMenu from "./CategoriesMenu";
 
 /**
  * Navigation bar component
@@ -70,6 +73,8 @@ const Navbar = () => {
           >
             {storeSettings?.store_name || config.app.name}
           </Typography>
+
+          <CategoriesMenu />
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {isAuthenticated ? (
@@ -137,6 +142,40 @@ const Navbar = () => {
                           <InventoryIcon fontSize="small" />
                         </ListItemIcon>
                         <ListItemText>Brands</ListItemText>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => handleAdminNavigation("/admin/roles")}
+                      >
+                        <ListItemIcon>
+                          <PeopleIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Roles</ListItemText>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => handleAdminNavigation("/admin/users")}
+                      >
+                        <ListItemIcon>
+                          <PeopleIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Users</ListItemText>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() =>
+                          handleAdminNavigation("/admin/price-lists")
+                        }
+                      >
+                        <ListItemIcon>
+                          <InventoryIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Price Lists</ListItemText>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => handleAdminNavigation("/admin/coupons")}
+                      >
+                        <ListItemIcon>
+                          <CouponIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Coupons</ListItemText>
                       </MenuItem>
                     </Menu>
                   </>

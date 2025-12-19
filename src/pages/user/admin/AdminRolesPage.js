@@ -11,45 +11,45 @@ import {
   TextField,
   Grid,
   Chip,
+  Box,
 } from "@mui/material";
 import {
-  LocalOfferOutlined,
+  AdminPanelSettingsOutlined,
   AddOutlined,
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
-import { DataTable, PageHeader } from "../../components";
-import productService from "../../services/productService";
+import { DataTable, PageHeader } from "../../../components";
+import roleService from "../../../services/roleService";
 
 /**
- * Admin page to manage brands
+ * Admin page to manage roles
  */
-const AdminBrandsPage = () => {
+const AdminRolesPage = () => {
   const { enqueueSnackbar } = useSnackbar();
-  const [brands, setBrands] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editingBrand, setEditingBrand] = useState(null);
-  const [brandToDelete, setBrandToDelete] = useState(null);
+  const [editingRole, setEditingRole] = useState(null);
+  const [roleToDelete, setRoleToDelete] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     slug: "",
-    logo_url: "",
   });
   const [submitting, setSubmitting] = useState(false);
 
-  const loadBrands = useCallback(async () => {
+  const loadRoles = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await productService.getBrands();
-      setBrands(data);
+      const data = await roleService.getRoles();
+      setRoles(data);
     } catch (err) {
-      const errorMsg = "Failed to load brands";
+      const errorMsg = "Failed to load roles";
       setError(errorMsg);
       enqueueSnackbar(errorMsg, { variant: "error" });
     } finally {
@@ -58,25 +58,23 @@ const AdminBrandsPage = () => {
   }, [enqueueSnackbar]);
 
   useEffect(() => {
-    loadBrands();
-  }, [loadBrands]);
+    loadRoles();
+  }, [loadRoles]);
 
-  const handleOpenDialog = (brand = null) => {
-    if (brand) {
-      setEditingBrand(brand);
+  const handleOpenDialog = (role = null) => {
+    if (role) {
+      setEditingRole(role);
       setFormData({
-        name: brand.name || "",
-        description: brand.description || "",
-        slug: brand.slug || "",
-        logo_url: brand.logo_url || "",
+        name: role.name || "",
+        description: role.description || "",
+        slug: role.slug || "",
       });
     } else {
-      setEditingBrand(null);
+      setEditingRole(null);
       setFormData({
         name: "",
         description: "",
         slug: "",
-        logo_url: "",
       });
     }
     setDialogOpen(true);
@@ -84,12 +82,11 @@ const AdminBrandsPage = () => {
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
-    setEditingBrand(null);
+    setEditingRole(null);
     setFormData({
       name: "",
       description: "",
       slug: "",
-      logo_url: "",
     });
   };
 
@@ -99,6 +96,20 @@ const AdminBrandsPage = () => {
       ...prev,
       [name]: value,
     }));
+
+    // Auto-generate slug from name if creating new role
+    if (name === "name" && !editingRole) {
+      const slug = value
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      setFormData((prev) => ({
+        ...prev,
+        slug,
+      }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -107,22 +118,27 @@ const AdminBrandsPage = () => {
       return;
     }
 
+    if (!formData.slug.trim()) {
+      enqueueSnackbar("Slug is required", { variant: "error" });
+      return;
+    }
+
     try {
       setSubmitting(true);
 
-      if (editingBrand) {
-        await productService.updateBrand(editingBrand.id, formData);
-        enqueueSnackbar("Brand updated successfully", { variant: "success" });
+      if (editingRole) {
+        await roleService.updateRole(editingRole.id, formData);
+        enqueueSnackbar("Role updated successfully", { variant: "success" });
       } else {
-        await productService.createBrand(formData);
-        enqueueSnackbar("Brand created successfully", { variant: "success" });
+        await roleService.createRole(formData);
+        enqueueSnackbar("Role created successfully", { variant: "success" });
       }
 
       handleCloseDialog();
-      loadBrands();
+      loadRoles();
     } catch (err) {
       enqueueSnackbar(
-        err.response?.data?.detail || `Failed to ${editingBrand ? "update" : "create"} brand`,
+        err.response?.data?.detail || `Failed to ${editingRole ? "update" : "create"} role`,
         { variant: "error" }
       );
     } finally {
@@ -130,27 +146,27 @@ const AdminBrandsPage = () => {
     }
   };
 
-  const handleOpenDeleteDialog = (brand) => {
-    setBrandToDelete(brand);
+  const handleOpenDeleteDialog = (role) => {
+    setRoleToDelete(role);
     setDeleteDialogOpen(true);
   };
 
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
-    setBrandToDelete(null);
+    setRoleToDelete(null);
   };
 
   const handleDelete = async () => {
-    if (!brandToDelete) return;
+    if (!roleToDelete) return;
 
     try {
-      await productService.deleteBrand(brandToDelete.id);
-      enqueueSnackbar("Brand deleted successfully", { variant: "success" });
+      await roleService.deleteRole(roleToDelete.id);
+      enqueueSnackbar("Role deleted successfully", { variant: "success" });
       handleCloseDeleteDialog();
-      loadBrands();
+      loadRoles();
     } catch (err) {
       enqueueSnackbar(
-        err.response?.data?.detail || "Failed to delete brand",
+        err.response?.data?.detail || "Failed to delete role",
         { variant: "error" }
       );
     }
@@ -160,72 +176,81 @@ const AdminBrandsPage = () => {
     {
       field: "id",
       header: "ID",
-      render: (row) => `#${row.id}`,
+      render: (row) => <Chip label={row.id} size="small" />,
     },
     {
       field: "name",
       header: "Name",
-      sortable: true,
+      render: (row) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <AdminPanelSettingsOutlined fontSize="small" color="primary" />
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {row.name}
+          </Typography>
+        </Box>
+      ),
     },
     {
       field: "slug",
       header: "Slug",
       render: (row) => (
-        <Chip label={row.slug || "N/A"} size="small" variant="outlined" />
+        <Chip
+          label={row.slug}
+          size="small"
+          variant="outlined"
+          sx={{ fontFamily: "monospace" }}
+        />
       ),
     },
     {
       field: "description",
       header: "Description",
-      render: (row) =>
-        row.description
-          ? row.description.length > 50
-            ? `${row.description.substring(0, 50)}...`
-            : row.description
-          : "-",
+      render: (row) => (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            maxWidth: 400,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {row.description || "—"}
+        </Typography>
+      ),
     },
     {
-      field: "logo_url",
-      header: "Logo",
-      render: (row) =>
-        row.logo_url ? (
-          <img
-            src={row.logo_url}
-            alt={row.name}
-            style={{ height: 30, objectFit: "contain" }}
-          />
-        ) : (
-          "-"
-        ),
+      field: "created_at",
+      header: "Created",
+      render: (row) => (
+        <Typography variant="body2" color="text.secondary">
+          {new Date(row.created_at).toLocaleDateString()}
+        </Typography>
+      ),
     },
     {
       field: "actions",
       header: "Actions",
       render: (row) => (
-        <>
+        <Box sx={{ display: "flex", gap: 1 }}>
           <IconButton
+            size="small"
             color="primary"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleOpenDialog(row);
-            }}
-            size="small"
-            title="Edit brand"
+            onClick={() => handleOpenDialog(row)}
+            title="Edit role"
           >
-            <EditIcon />
+            <EditIcon fontSize="small" />
           </IconButton>
           <IconButton
-            color="error"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleOpenDeleteDialog(row);
-            }}
             size="small"
-            title="Delete brand"
+            color="error"
+            onClick={() => handleOpenDeleteDialog(row)}
+            title="Delete role"
           >
-            <DeleteIcon />
+            <DeleteIcon fontSize="small" />
           </IconButton>
-        </>
+        </Box>
       ),
     },
   ];
@@ -233,15 +258,16 @@ const AdminBrandsPage = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <PageHeader
-        title="Brands"
-        description="Manage product brands"
+        title="Roles Management"
+        description="Manage user roles and permissions"
+        icon={<AdminPanelSettingsOutlined sx={{ fontSize: 40 }} />}
         action={
           <Button
             variant="contained"
             startIcon={<AddOutlined />}
             onClick={() => handleOpenDialog()}
           >
-            Add Brand
+            Add Role
           </Button>
         }
       />
@@ -254,31 +280,33 @@ const AdminBrandsPage = () => {
 
       <DataTable
         columns={columns}
-        data={brands}
+        data={roles}
         loading={loading}
         emptyState={{
-          icon: LocalOfferOutlined,
-          iconColor: "primary.main",
-          title: "No Brands Found",
-          description: "Create your first brand to get started.",
+          icon: AdminPanelSettingsOutlined,
+          title: "No roles found",
+          description: "Create your first role to manage user permissions",
+          actionLabel: "Add Role",
+          onAction: () => handleOpenDialog(),
         }}
       />
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
-          {editingBrand ? "Edit Brand" : "Create New Brand"}
+          {editingRole ? "Edit Role" : "Create New Role"}
         </DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Name"
+                label="Role Name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 required
+                helperText="Name of the role (e.g., Administrator, Editor)"
               />
             </Grid>
             <Grid item xs={12}>
@@ -288,27 +316,21 @@ const AdminBrandsPage = () => {
                 name="slug"
                 value={formData.slug}
                 onChange={handleChange}
-                helperText="URL-friendly version of the name"
+                required
+                helperText="URL-friendly identifier (e.g., administrator, editor)"
+                disabled={editingRole !== null}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 fullWidth
+                multiline
+                rows={3}
                 label="Description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                multiline
-                rows={3}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Logo URL"
-                name="logo_url"
-                value={formData.logo_url}
-                onChange={handleChange}
+                helperText="Optional description of the role's purpose"
               />
             </Grid>
           </Grid>
@@ -322,18 +344,23 @@ const AdminBrandsPage = () => {
             variant="contained"
             disabled={submitting}
           >
-            {editingBrand ? "Update" : "Create"}
+            {submitting ? "Saving..." : editingRole ? "Update" : "Create"}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Delete Brand</DialogTitle>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        maxWidth="sm"
+      >
+        <DialogTitle>Delete Role</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete the brand "
-            {brandToDelete?.name}"? This action cannot be undone.
+            Are you sure you want to delete the role{" "}
+            <strong>{roleToDelete?.name}</strong>? This action cannot be undone
+            and may affect users assigned to this role.
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -347,4 +374,4 @@ const AdminBrandsPage = () => {
   );
 };
 
-export default AdminBrandsPage;
+export default AdminRolesPage;

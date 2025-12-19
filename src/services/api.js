@@ -128,26 +128,32 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest);
         } catch (refreshError) {
           clearTokens();
-          if (notificationHandler) {
+          if (window.location.pathname !== "/login" && notificationHandler) {
             notificationHandler("Session expired. Please log in again.", {
               variant: "warning",
             });
           }
-          setTimeout(() => {
-            window.location.href = "/login";
-          }, 1000);
+          if (window.location.pathname !== "/login") {
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 1000);
+          }
           return Promise.reject(refreshError);
         }
       } else {
         clearTokens();
-        if (notificationHandler) {
+        
+        if (window.location.pathname !== "/login" && notificationHandler) {
           notificationHandler("Please log in to continue.", {
             variant: "info",
           });
         }
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 1000);
+
+        if (window.location.pathname !== "/login") {
+           setTimeout(() => {
+             window.location.href = "/login";
+           }, 1000);
+        }
         return Promise.reject(error);
       }
     }

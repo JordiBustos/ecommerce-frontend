@@ -1,9 +1,9 @@
 import { Container, Typography, Chip } from "@mui/material";
 import { Receipt as ReceiptIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import useDataFetching from "../hooks/useDataFetching";
-import { DataTable, StatusChip, PageHeader } from "../components";
-import orderService from "../services/orderService";
+import useDataFetching from "../../hooks/useDataFetching";
+import { DataTable, StatusChip, PageHeader } from "../../components";
+import orderService from "../../services/orderService";
 
 /**
  * Orders page component - Lists all user orders
@@ -58,6 +58,21 @@ const OrdersPage = () => {
           color="primary"
           variant="outlined"
         />
+      ),
+    },
+    {
+      header: "Coupon",
+      render: (row) => (
+        row.coupon_code ? (
+          <Chip
+            label={row.coupon_code}
+            size="small"
+            color="success"
+            variant="outlined"
+          />
+        ) : (
+          <Typography variant="body2" color="text.secondary">—</Typography>
+        )
       ),
     },
   ];

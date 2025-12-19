@@ -20,20 +20,21 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import productService from "../../services/productService";
-import { useForm } from "../../hooks";
+import productService from "../../../services/productService";
+import { useCategories } from "../../../contexts/CategoriesContext";
+import { useForm } from "../../../hooks";
 
 /**
  * Admin page to edit product details
  */
 const AdminEditProductPage = () => {
-  const { productId } = useParams();
+  const { productSlug } = useParams();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const { categoriesFlat } = useCategories();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [product, setProduct] = useState(null);
 
@@ -62,22 +63,20 @@ const AdminEditProductPage = () => {
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId]);
+  }, [productSlug]);
 
   /**
-   * Load product, categories, and brands
+   * Load product and brands (categories from context)
    */
   const loadData = async () => {
     try {
       setLoading(true);
-      const [productData, categoriesData, brandsData] = await Promise.all([
-        productService.getProductById(productId),
-        productService.getCategories(),
+      const [productData, brandsData] = await Promise.all([
+        productService.getProductBySlug(productSlug),
         productService.getBrands(),
       ]);
 
       setProduct(productData);
-      setCategories(categoriesData);
       setBrands(brandsData);
 
       // Set form values from product data
@@ -170,7 +169,7 @@ const AdminEditProductPage = () => {
         is_active: formValues.is_active,
       };
 
-      await productService.updateProduct(productId, updateData);
+      await productService.updateProduct(product.slug, updateData);
       enqueueSnackbar("Product updated successfully", { variant: "success" });
       navigate("/admin/products");
     } catch (error) {
@@ -227,7 +226,7 @@ const AdminEditProductPage = () => {
           Edit Product
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Update product information - #{productId}
+          Update product information - {product?.name || "Loading..."}
         </Typography>
       </Box>
 
@@ -448,8 +447,9 @@ const AdminEditProductPage = () => {
                 <MenuItem value="">
                   <em>None</em>
                 </MenuItem>
-                {categories.map((category) => (
+                {categoriesFlat.map((category) => (
                   <MenuItem key={category.id} value={category.id}>
+                    {"\u00A0\u00A0\u00A0".repeat(category.depth)}
                     {category.name}
                   </MenuItem>
                 ))}

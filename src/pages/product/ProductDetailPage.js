@@ -32,15 +32,16 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import productService from "../services/productService";
-import { useCart } from "../contexts/CartContext";
-import { useFavorites } from "../contexts/FavoritesContext";
-import { useAuth } from "../contexts/AuthContext";
-import ProductCarousel from "../components/ProductCarousel";
+import productService from "../../services/productService.js";
+import { useCart } from "../../contexts/CartContext.js";
+import { useFavorites } from "../../contexts/FavoritesContext.js";
+import { useAuth } from "../../contexts/AuthContext.js";
+import { useCategories } from "../../contexts/CategoriesContext.js";
+import ProductCarousel from "../../components/ProductCarousel.js";
 import {
   CardSkeleton,
   ProductDetailSkeleton,
-} from "../components/ProductsSkeletons.js";
+} from "../../components/ProductsSkeletons.js";
 import { useMemo } from "react";
 
 const formatDate = (dateString) => {
@@ -62,9 +63,9 @@ const ProductDetailPage = () => {
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isAuthenticated } = useAuth();
+  const { categories } = useCategories(); // Get categories from context
 
   const [product, setProduct] = useState(null);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [similarProducts, setSimilarProducts] = useState([]);
@@ -76,15 +77,11 @@ const ProductDetailPage = () => {
 
     const loadData = async () => {
       try {
-        const [productData, categoriesData] = await Promise.all([
-          productService.getProductBySlug(productSlug),
-          productService.getCategories(),
-        ]);
+        const productData = await productService.getProductBySlug(productSlug);
 
         if (isMounted) {
           // Batch updates where possible (React 18 does this auto, but good practice)
           setProduct(productData);
-          setCategories(categoriesData);
           // Reset quantity on new product load
           setQuantity(1);
         }
@@ -350,53 +347,68 @@ const ProductDetailPage = () => {
             )}
 
             {/* Price */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 1 }}>
               {product.has_discount ? (
                 <Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
-                    <Typography
-                      variant="h3"
-                      color="error.main"
-                      sx={{ fontWeight: 700 }}
-                    >
-                      ${product.final_price.toFixed(2)}
-                    </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mb: 0.5,
+                    }}
+                  >
                     <Typography
                       variant="h5"
+                      color="error.main"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: "1.5rem",
+                      }}
+                    >
+                      ${product.final_price?.toFixed(2)}
+                    </Typography>
+                    <Typography
+                      variant="body1"
                       sx={{
                         textDecoration: "line-through",
                         color: "text.secondary",
+                        fontSize: "1rem",
                       }}
                     >
-                      ${product.price.toFixed(2)}
+                      ${product.price?.toFixed(2)}
                     </Typography>
                   </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <Chip
-                      label={`${product.savings_percent.toFixed(0)}% OFF`}
-                      color="error"
-                      sx={{ fontWeight: 600, fontSize: "0.9rem" }}
-                    />
-                    <Typography variant="body1" color="success.main" sx={{ fontWeight: 600 }}>
-                      Save ${product.savings.toFixed(2)}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        bgcolor: "error.main",
+                        color: "white",
+                        px: 1,
+                        py: 0.3,
+                        borderRadius: 1,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {product.savings_percent?.toFixed(0)}% OFF
                     </Typography>
-                    {product.discount_source && (
-                      <Chip
-                        label={product.discount_source}
-                        size="small"
-                        variant="outlined"
-                        color="primary"
-                      />
-                    )}
+                    <Typography variant="caption" color="text.secondary">
+                      Save ${product.savings?.toFixed(2)}
+                    </Typography>
                   </Box>
                 </Box>
               ) : (
                 <Typography
-                  variant="h4"
-                  color="primary"
-                  sx={{ fontWeight: 700 }}
+                  variant="h5"
+                  color="text.primary"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: "1.5rem",
+                  }}
                 >
-                  ${product.final_price.toFixed(2)}
+                  $
+                  {product.final_price?.toFixed(2) || product.price?.toFixed(2)}
                 </Typography>
               )}
             </Box>

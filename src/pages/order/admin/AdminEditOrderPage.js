@@ -34,10 +34,10 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import orderService from "../../services/orderService";
-import productService from "../../services/productService";
-import config from "../../config";
-import { useForm } from "../../hooks";
+import orderService from "../../../services/orderService";
+import productService from "../../../services/productService";
+import config from "../../../config";
+import { useForm } from "../../../hooks";
 
 /**
  * Admin page to edit order details
@@ -58,6 +58,7 @@ const AdminEditOrderPage = () => {
       shipping_address: "",
       replacement_criterion: "",
       comment: "",
+      estimated_delivery_date: "",
     },
     handleSaveOrder,
     validateForm
@@ -83,6 +84,9 @@ const AdminEditOrderPage = () => {
         shipping_address: orderData.shipping_address || "",
         replacement_criterion: orderData.replacement_criterion || "",
         comment: orderData.comment || "",
+        estimated_delivery_date: orderData.estimated_delivery_date
+          ? orderData.estimated_delivery_date.split("T")[0]
+          : "",
       });
 
       // Fetch product details for each order item
@@ -90,10 +94,10 @@ const AdminEditOrderPage = () => {
         const itemsWithProducts = await Promise.all(
           orderData.items.map(async (item) => {
             try {
-              const product = await productService.getProductById(item.product_id);
+              const product = await productService.getProductBySlug(item.product_slug);
               return { ...item, product };
             } catch (err) {
-              console.error(`Failed to fetch product ${item.product_id}:`, err);
+              console.error(`Failed to fetch product ${item.product_slug}:`, err);
               return { ...item, product: null };
             }
           })
@@ -134,8 +138,7 @@ const AdminEditOrderPage = () => {
         status: formValues.status,
         shipping_address: formValues.shipping_address || null,
         replacement_criterion: formValues.replacement_criterion || null,
-        comment: formValues.comment || null,
-      };
+        comment: formValues.comment || null,        estimated_delivery_date: formValues.estimated_delivery_date || null,      };
 
       await orderService.updateOrder(orderId, updateData);
       enqueueSnackbar("Order updated successfully", { variant: "success" });
@@ -285,6 +288,22 @@ const AdminEditOrderPage = () => {
                     value={values.comment}
                     onChange={handleChange}
                     helperText="Comment from customer to admin (provided during checkout)"
+                  />
+                </Grid>
+
+                {/* Estimated Delivery Date */}
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    label="Estimated Delivery Date"
+                    name="estimated_delivery_date"
+                    value={values.estimated_delivery_date}
+                    onChange={handleChange}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    helperText="Expected delivery date for this order"
                   />
                 </Grid>
 
@@ -472,12 +491,12 @@ const AdminEditOrderPage = () => {
                                 {item.product.name}
                               </Typography>
                               <Typography variant="caption" color="text.secondary">
-                                ID: #{item.product_id}
+                                Slug: {item.product_slug}
                               </Typography>
                             </Box>
                           ) : (
                             <Typography variant="body2" color="text.secondary">
-                              Product #{item.product_id} (Not found)
+                              Product {item.product_slug} (Not found)
                             </Typography>
                           )}
                         </TableCell>

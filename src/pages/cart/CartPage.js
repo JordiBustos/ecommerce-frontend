@@ -17,9 +17,9 @@ import {
   ShoppingCartOutlined as EmptyCartIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../contexts/CartContext";
 import { useSnackbar } from "notistack";
-import EmptyState from "../components/EmptyState";
+import { useCart } from "../../contexts/CartContext";
+import EmptyState from "../../components/EmptyState";
 
 /**
  * Cart page component

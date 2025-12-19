@@ -16,8 +16,8 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import { useAuth } from "../contexts/AuthContext";
-import { parseAPIError, validateDNI, validatePhone } from "../utils/security";
+import { useAuth } from "../../contexts/AuthContext";
+import { parseAPIError, validateDNI, validatePhone } from "../../utils/security";
 
 /**
  * Register page component
