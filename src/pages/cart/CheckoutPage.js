@@ -24,6 +24,7 @@ import {
   LocalShipping,
   Store as StoreIcon,
   Add as AddIcon,
+  LocalOffer as CouponIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
@@ -32,6 +33,7 @@ import { useSnackbar } from "notistack";
 import userService from "../../services/userService";
 import storeService from "../../services/storeService";
 import orderService from "../../services/orderService";
+import couponService from "../../services/couponService";
 
 /**
  * Checkout page component
@@ -51,6 +53,11 @@ const CheckoutPage = () => {
   const [selectedStoreId, setSelectedStoreId] = useState("");
   const [comment, setComment] = useState("");
   const [replacementCriterion, setReplacementCriterion] = useState("");
+
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   // Address dialog state
   const [showAddressDialog, setShowAddressDialog] = useState(false);
@@ -119,9 +126,64 @@ const CheckoutPage = () => {
     }, 0);
   };
 
-  const shippingCost = deliveryMethod === "home" ? 5.0 : 0;
+  const shippingCost = deliveryMethod === "home" ? 0 : 0; // TODO
   const subtotal = calculateSubtotal();
-  const total = subtotal + shippingCost;
+  
+  // Calculate discount from coupon
+  const discountAmount = appliedCoupon
+    ? appliedCoupon.discount_type === 'percentage'
+      ? (subtotal * appliedCoupon.discount_value) / 100
+      : appliedCoupon.discount_value
+    : 0;
+  
+  const total = subtotal + shippingCost - discountAmount;
+
+  /**
+   * Handle applying coupon
+   */
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      enqueueSnackbar("Please enter a coupon code", { variant: "warning" });
+      return;
+    }
+
+    try {
+      setValidatingCoupon(true);
+      const response = await couponService.validateCoupon(couponCode.trim().toUpperCase(), total);
+      
+      if (response.valid) {
+        // Check minimum order amount
+        if (response.coupon.min_order_amount > subtotal) {
+          enqueueSnackbar(
+            `Minimum order amount of $${response.coupon.min_order_amount.toFixed(2)} required`,
+            { variant: "error" }
+          );
+          return;
+        }
+        
+        setAppliedCoupon(response.coupon);
+        enqueueSnackbar("Coupon applied successfully!", { variant: "success" });
+      } else {
+        enqueueSnackbar(response.message || "Invalid coupon code", { variant: "error" });
+      }
+    } catch (error) {
+      enqueueSnackbar(
+        error.response?.data?.detail || "Failed to validate coupon",
+        { variant: "error" }
+      );
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  /**
+   * Handle removing coupon
+   */
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    enqueueSnackbar("Coupon removed", { variant: "info" });
+  };
 
   /**
    * Handle opening address dialog
@@ -236,7 +298,6 @@ const CheckoutPage = () => {
     try {
       setSubmitting(true);
 
-      // Ensure items is a proper array of { product_id, quantity }
       const itemsArray = Array.isArray(cart.items)
         ? cart.items
         : Object.values(cart.items || {});
@@ -250,6 +311,7 @@ const CheckoutPage = () => {
         })),
         replacement_criterion: replacementCriterion || "",
         comment: comment || "",
+        coupon_code: appliedCoupon ? appliedCoupon.code : null,
       };
 
       const order = await orderService.createOrder(orderData);
@@ -597,6 +659,52 @@ const CheckoutPage = () => {
 
               <Divider sx={{ my: 2 }} />
 
+              {/* Coupon Section */}
+              {!appliedCoupon ? (
+                <Box sx={{ mb: 2 }}>
+                  <Box display="flex" gap={1} alignItems="flex-start">
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Enter coupon code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleApplyCoupon();
+                        }
+                      }}
+                      disabled={validatingCoupon}
+                      InputProps={{
+                        startAdornment: <CouponIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                      }}
+                    />
+                    <Button
+                      variant="outlined"
+                      onClick={handleApplyCoupon}
+                      disabled={validatingCoupon || !couponCode.trim()}
+                      sx={{ minWidth: 80, whiteSpace: 'nowrap' }}
+                    >
+                      {validatingCoupon ? <CircularProgress size={20} /> : 'Apply'}
+                    </Button>
+                  </Box>
+                </Box>
+              ) : (
+                <Alert
+                  severity="success"
+                  onClose={handleRemoveCoupon}
+                  sx={{ mb: 2 }}
+                  icon={<CouponIcon />}
+                >
+                  <Typography variant="body2" fontWeight="bold">
+                    {appliedCoupon.code} applied
+                  </Typography>
+                  <Typography variant="caption">
+                    {appliedCoupon.description}
+                  </Typography>
+                </Alert>
+              )}
+
               {/* Pricing */}
               <Box display="flex" justifyContent="space-between" mb={1}>
                 <Typography variant="body2">Subtotal:</Typography>
@@ -609,6 +717,19 @@ const CheckoutPage = () => {
                   ${shippingCost.toFixed(2)}
                 </Typography>
               </Box>
+
+              {appliedCoupon && (
+                <Box display="flex" justifyContent="space-between" mb={1}>
+                  <Typography variant="body2" color="success.main">
+                    Discount ({appliedCoupon.discount_type === 'percentage' 
+                      ? `${appliedCoupon.discount_value}%` 
+                      : `$${appliedCoupon.discount_value}`}):
+                  </Typography>
+                  <Typography variant="body2" color="success.main">
+                    -${discountAmount.toFixed(2)}
+                  </Typography>
+                </Box>
+              )}
 
               <Divider sx={{ my: 2 }} />
 

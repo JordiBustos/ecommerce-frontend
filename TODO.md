@@ -17,6 +17,10 @@
 - [ ] **Skeletons & Loaders**: Implementar skeletons de carga en lugar de spinners genéricos
 - [ ] **Error boundaries**: Agregar manejo de errores global con componentes boundary
 - [ ] **Toast notifications**: Revisar y unificar todas las notificaciones (notistack)
+- [ ] **Search bar** in navbar
+- [ ] **Catalogue price filters**
+- [ ] **Customizable FAQs**
+- [ ] SSO Integration
 
 ## 🟡 Importante / Media Prioridad
 
@@ -31,7 +35,6 @@
 ### CRUD Completo
 
 - [ ] **Export CSV**: Exportar productos masivamente
-- [ ] **Bulk operations**: Editar múltiples productos a la vez (precio, stock, status) (quizá se resuelve con 2.)
 - [ ] **Product variants**: Soporte para variantes (talla, color, etc.)
 - [ ] **Product images**: Soporte para varias imagenes
 
@@ -47,7 +50,7 @@
 
 ### Backend & Frontend Integration
 
-- [ ] **Lógica de promociones**: Sistema de cupones
+- [ ] **Lógica de promociones**: Mejorar asignación de cupones. 
 - [ ] **Lógica de envíos**: Cálculo de costos por zona/peso
 - [ ] **Stock reservado**: Reservar stock temporalmente durante el checkout (opcional)
 - [ ] **Notificaciones de bajo stock**: Alertas cuando productos están por agotarse

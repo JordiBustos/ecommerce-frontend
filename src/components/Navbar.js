@@ -22,6 +22,7 @@ import {
   Inventory as InventoryIcon,
   People as PeopleIcon,
   ShoppingCartOutlined,
+  LocalOffer as CouponIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -167,6 +168,14 @@ const Navbar = () => {
                           <InventoryIcon fontSize="small" />
                         </ListItemIcon>
                         <ListItemText>Price Lists</ListItemText>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => handleAdminNavigation("/admin/coupons")}
+                      >
+                        <ListItemIcon>
+                          <CouponIcon fontSize="small" />
+                        </ListItemIcon>
+                        <ListItemText>Coupons</ListItemText>
                       </MenuItem>
                     </Menu>
                   </>

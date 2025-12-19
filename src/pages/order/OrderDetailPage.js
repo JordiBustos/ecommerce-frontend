@@ -494,6 +494,22 @@ const OrderDetailPage = () => {
                       </Typography>
                     </Box>
                   )}
+                  {order.coupon_code && order.discount_amount && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
+                      <Typography variant="body1" color="success.main">
+                        Discount ({order.coupon_code}):
+                      </Typography>
+                      <Typography variant="body1" color="success.main">
+                        -${order.discount_amount.toFixed(2)}
+                      </Typography>
+                    </Box>
+                  )}
                   <Divider sx={{ my: 2 }} />
                   <Box
                     sx={{ display: "flex", justifyContent: "space-between" }}
@@ -506,7 +522,7 @@ const OrderDetailPage = () => {
                       sx={{ fontWeight: 700, color: "primary.main" }}
                     >
                       $
-                      {order.total?.toFixed(2) ||
+                      {order.total_amount?.toFixed(2) ||
                         calculateSubtotal().toFixed(2)}
                     </Typography>
                   </Box>

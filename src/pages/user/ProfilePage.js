@@ -20,16 +20,30 @@ import {
   FormControlLabel,
   Switch,
   Divider,
+  Tabs,
+  Tab,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
+  ConfirmationNumber as CouponIcon,
+  Person as PersonIcon,
+  LocationOn as LocationIcon,
+  Settings as SettingsIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSnackbar } from "notistack";
 import addressService from "../../services/addressService";
 import newsletterService from "../../services/newsletterService";
+import couponService from "../../services/couponService";
 import {
   validateEmail,
   validatePhone,
@@ -44,6 +58,7 @@ import {
 const ProfilePage = () => {
   const { user, updateUser } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
+  const [activeTab, setActiveTab] = useState(0);
   const [formData, setFormData] = useState({
     email: "",
     full_name: "",
@@ -53,8 +68,10 @@ const ProfilePage = () => {
     phone_number: "",
   });
   const [addresses, setAddresses] = useState([]);
+  const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [addressLoading, setAddressLoading] = useState(false);
+  const [couponsLoading, setCouponsLoading] = useState(false);
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -103,6 +120,21 @@ const ProfilePage = () => {
     }
   }, []);
 
+  /**
+   * Load user coupons
+   */
+  const loadCoupons = useCallback(async () => {
+    try {
+      setCouponsLoading(true);
+      const data = await couponService.getMyCoupons();
+      setCoupons(data.coupons || []);
+    } catch (error) {
+      enqueueSnackbar("Failed to load coupons", { variant: "error" });
+    } finally {
+      setCouponsLoading(false);
+    }
+  }, [enqueueSnackbar]);
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -116,7 +148,15 @@ const ProfilePage = () => {
     }
     loadAddresses();
     checkNewsletterStatus();
-  }, [user, loadAddresses, checkNewsletterStatus]);
+    loadCoupons();
+  }, [user, loadAddresses, checkNewsletterStatus, loadCoupons]);
+
+  /**
+   * Handle tab change
+   */
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
 
   /**
    * Handle newsletter subscription toggle
@@ -354,288 +394,450 @@ const ProfilePage = () => {
     setAddressToDelete(null);
   };
 
+  /**
+   * Format coupon discount
+   */
+  const formatDiscount = (coupon) => {
+    if (coupon.discount_type === "percentage") {
+      return `${coupon.discount_value}%`;
+    }
+    return `€${coupon.discount_value}`;
+  };
+
+  /**
+   * Get coupon status color
+   */
+  const getCouponStatusColor = (coupon) => {
+    if (!coupon.is_active) return "default";
+    
+    const now = new Date();
+    const validFrom = new Date(coupon.valid_from);
+    const validTo = new Date(coupon.valid_to);
+    
+    if (now < validFrom) return "info";
+    if (now > validTo) return "error";
+    
+    return "success";
+  };
+
+  /**
+   * Get coupon status label
+   */
+  const getCouponStatusLabel = (coupon) => {
+    if (!coupon.is_active) return "Inactive";
+    
+    const now = new Date();
+    const validFrom = new Date(coupon.valid_from);
+    const validTo = new Date(coupon.valid_to);
+    
+    if (now < validFrom) return "Not yet valid";
+    if (now > validTo) return "Expired";
+    
+    return "Active";
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h3" gutterBottom>
         My Profile
       </Typography>
 
-      {/* Personal Information */}
-      <Paper sx={{ p: 4, mt: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Personal Information
-        </Typography>
-
-        {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            Profile updated successfully!
-          </Alert>
-        )}
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Full Name"
-                name="full_name"
-                value={formData.full_name}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="DNI"
-                name="dni"
-                value={formData.dni}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Phone Number"
-                name="phone_number"
-                value={formData.phone_number}
-                onChange={handleChange}
-                disabled={loading}
-                placeholder="+34 600 000 000"
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Birth Date"
-                name="birth_date"
-                type="date"
-                value={formData.birth_date}
-                onChange={handleChange}
-                disabled={loading}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                select
-                label="Gender"
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                disabled={loading}
-              >
-                <MenuItem value="male">Male</MenuItem>
-                <MenuItem value="female">Female</MenuItem>
-                <MenuItem value="other">Other</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={24} /> : "Update Profile"}
-              </Button>
-            </Grid>
-          </Grid>
-        </Box>
-      </Paper>
-
-      {/* Addresses Section */}
-      <Paper sx={{ p: 4, mt: 3 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
-          }}
+      <Paper sx={{ mt: 3 }}>
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange}
+          variant="fullWidth"
+          sx={{ borderBottom: 1, borderColor: "divider" }}
         >
-          <Typography variant="h5">Addresses</Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => handleAddressDialogOpen()}
-          >
-            Add Address
-          </Button>
-        </Box>
+          <Tab icon={<PersonIcon />} label="Personal Info" iconPosition="start" />
+          <Tab icon={<LocationIcon />} label="Addresses" iconPosition="start" />
+          <Tab icon={<CouponIcon />} label="My Coupons" iconPosition="start" />
+          <Tab icon={<SettingsIcon />} label="Settings" iconPosition="start" />
+        </Tabs>
 
-        {addressLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : addresses.length === 0 ? (
-          <Alert severity="info">
-            No addresses found. Add your first address to get started.
-          </Alert>
-        ) : (
-          <Grid container spacing={2}>
-            {addresses.map((address) => (
-              <Grid item xs={12} md={6} key={address.id}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Box
+        {/* Tab Panel 0: Personal Information */}
+        {activeTab === 0 && (
+          <Box sx={{ p: 4 }}>
+            <Typography variant="h5" gutterBottom>
+              Personal Information
+            </Typography>
+
+            {success && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                Profile updated successfully!
+              </Alert>
+            )}
+
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Full Name"
+                    name="full_name"
+                    value={formData.full_name}
+                    onChange={handleChange}
+                    disabled={loading}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    disabled={loading}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="DNI"
+                    name="dni"
+                    value={formData.dni}
+                    onChange={handleChange}
+                    disabled={loading}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Phone Number"
+                    name="phone_number"
+                    value={formData.phone_number}
+                    onChange={handleChange}
+                    disabled={loading}
+                    placeholder="+34 600 000 000"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Birth Date"
+                    name="birth_date"
+                    type="date"
+                    value={formData.birth_date}
+                    onChange={handleChange}
+                    disabled={loading}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    select
+                    label="Gender"
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    disabled={loading}
+                  >
+                    <MenuItem value="male">Male</MenuItem>
+                    <MenuItem value="female">Female</MenuItem>
+                    <MenuItem value="other">Other</MenuItem>
+                  </TextField>
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    disabled={loading}
+                  >
+                    {loading ? <CircularProgress size={24} /> : "Update Profile"}
+                  </Button>
+                </Grid>
+              </Grid>
+            </Box>
+
+            {/* Account Details */}
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h5" gutterBottom>
+                Account Details
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      User ID
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {user?.id}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Username
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {user?.username}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Account Status
+                    </Typography>
+                    <Typography
+                      variant="body1"
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
+                        fontWeight: 500,
+                        color: user?.is_active ? "success.main" : "error.main",
                       }}
                     >
-                      <Box sx={{ flex: 1 }}>
-                        {address.is_default && (
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: "primary.main",
-                              fontWeight: 600,
-                              mb: 1,
-                              display: "block",
-                            }}
-                          >
-                            DEFAULT
-                          </Typography>
-                        )}
-                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                          {address.full_name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {address.address_line1}
-                        </Typography>
-                        {address.address_line2 && (
-                          <Typography variant="body2" color="text.secondary">
-                            {address.address_line2}
-                          </Typography>
-                        )}
-                        <Typography variant="body2" color="text.secondary">
-                          {address.city}, {address.province}{" "}
-                          {address.postal_code}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {address.country}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mt: 0.5 }}
-                        >
-                          📞 {address.phone_number}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleAddressDialogOpen(address)}
-                          sx={{ mr: 1 }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleAddressDelete(address)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+                      {user?.is_active ? "Active" : "Inactive"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Account Type
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {user?.is_superuser ? "Admin" : "Regular User"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Member Since
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {user?.created_at
+                        ? new Date(user.created_at).toLocaleDateString()
+                        : "N/A"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Last Updated
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {user?.updated_at
+                        ? new Date(user.updated_at).toLocaleDateString()
+                        : "N/A"}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Box>
+          </Box>
         )}
-      </Paper>
 
-      {/* Account Details */}
-      <Paper sx={{ p: 4, mt: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Account Details
-        </Typography>
-        <Box sx={{ mt: 2 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">
-                User ID
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.id}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">
-                Username
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.username}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">
-                Account Status
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 500,
-                  color: user?.is_active ? "success.main" : "error.main",
-                }}
+        {/* Tab Panel 1: Addresses Section */}
+        {activeTab === 1 && (
+          <Box sx={{ p: 4 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
+              <Typography variant="h5">Addresses</Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => handleAddressDialogOpen()}
               >
-                {user?.is_active ? "Active" : "Inactive"}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">
-                Account Type
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.is_superuser ? "Admin" : "Regular User"}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">
-                Member Since
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.created_at
-                  ? new Date(user.created_at).toLocaleDateString()
-                  : "N/A"}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="text.secondary">
-                Last Updated
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.updated_at
-                  ? new Date(user.updated_at).toLocaleDateString()
-                  : "N/A"}
-              </Typography>
-            </Grid>
-          </Grid>
-        </Box>
+                Add Address
+              </Button>
+            </Box>
+
+            {addressLoading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : addresses.length === 0 ? (
+              <Alert severity="info">
+                No addresses found. Add your first address to get started.
+              </Alert>
+            ) : (
+              <Grid container spacing={2}>
+                {addresses.map((address) => (
+                  <Grid item xs={12} md={6} key={address.id}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "flex-start",
+                          }}
+                        >
+                          <Box sx={{ flex: 1 }}>
+                            {address.is_default && (
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: "primary.main",
+                                  fontWeight: 600,
+                                  mb: 1,
+                                  display: "block",
+                                }}
+                              >
+                                DEFAULT
+                              </Typography>
+                            )}
+                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                              {address.full_name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {address.address_line1}
+                            </Typography>
+                            {address.address_line2 && (
+                              <Typography variant="body2" color="text.secondary">
+                                {address.address_line2}
+                              </Typography>
+                            )}
+                            <Typography variant="body2" color="text.secondary">
+                              {address.city}, {address.province}{" "}
+                              {address.postal_code}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {address.country}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ mt: 0.5 }}
+                            >
+                              📞 {address.phone_number}
+                            </Typography>
+                          </Box>
+                          <Box>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleAddressDialogOpen(address)}
+                              sx={{ mr: 1 }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleAddressDelete(address)}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Box>
+        )}
+
+        {/* Tab Panel 2: My Coupons */}
+        {activeTab === 2 && (
+          <Box sx={{ p: 4 }}>
+            <Typography variant="h5" gutterBottom>
+              My Coupons
+            </Typography>
+
+            {couponsLoading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : coupons.length === 0 ? (
+              <Alert severity="info">
+                You don't have any coupons yet. Check your email for exclusive offers!
+              </Alert>
+            ) : (
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Code</TableCell>
+                      <TableCell>Description</TableCell>
+                      <TableCell>Discount</TableCell>
+                      <TableCell>Valid Period</TableCell>
+                      <TableCell>Min. Order</TableCell>
+                      <TableCell>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {coupons.map((coupon) => (
+                      <TableRow key={coupon.id}>
+                        <TableCell>
+                          <Chip 
+                            label={coupon.code} 
+                            size="small" 
+                            sx={{ fontWeight: 600, fontFamily: "monospace" }}
+                          />
+                        </TableCell>
+                        <TableCell>{coupon.description || "—"}</TableCell>
+                        <TableCell>
+                          <Typography sx={{ fontWeight: 600, color: "primary.main" }}>
+                            {formatDiscount(coupon)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">
+                            {new Date(coupon.valid_from).toLocaleDateString()}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            to {new Date(coupon.valid_to).toLocaleDateString()}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          {coupon.minimum_order_amount ? `€${coupon.minimum_order_amount}` : "—"}
+                        </TableCell>
+                        <TableCell>
+                          <Chip 
+                            label={getCouponStatusLabel(coupon)}
+                            color={getCouponStatusColor(coupon)}
+                            size="small"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Box>
+        )}
+
+        {/* Tab Panel 3: Account Settings */}
+        {activeTab === 3 && (
+          <Box sx={{ p: 4 }}>
+            <Typography variant="h5" gutterBottom>
+              Account Settings
+            </Typography>
+            <Divider sx={{ mb: 3 }} />
+
+            <Box>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={newsletterSubscribed}
+                    onChange={handleNewsletterToggle}
+                    disabled={newsletterLoading}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body1">Newsletter Subscription</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Receive updates about new products, exclusive discounts, and
+                      more
+                    </Typography>
+                  </Box>
+                }
+              />
+            </Box>
+          </Box>
+        )}
       </Paper>
 
       {/* Address Dialog */}
@@ -734,21 +936,16 @@ const ProfilePage = () => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <input
-                    type="checkbox"
-                    id="is_default"
-                    name="is_default"
-                    checked={addressFormData.is_default}
-                    onChange={handleAddressFormChange}
-                    style={{ marginRight: 8 }}
-                  />
-                  <label htmlFor="is_default">
-                    <Typography variant="body2">
-                      Set as default address
-                    </Typography>
-                  </label>
-                </Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={addressFormData.is_default}
+                      onChange={handleAddressFormChange}
+                      name="is_default"
+                    />
+                  }
+                  label="Set as default address"
+                />
               </Grid>
             </Grid>
           </Box>
@@ -820,35 +1017,6 @@ const ProfilePage = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Account Settings Section */}
-      <Paper sx={{ p: 4, mt: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Account Settings
-        </Typography>
-        <Divider sx={{ mb: 3 }} />
-
-        <Box>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={newsletterSubscribed}
-                onChange={handleNewsletterToggle}
-                disabled={newsletterLoading}
-              />
-            }
-            label={
-              <Box>
-                <Typography variant="body1">Newsletter Subscription</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Receive updates about new products, exclusive discounts, and
-                  more
-                </Typography>
-              </Box>
-            }
-          />
-        </Box>
-      </Paper>
     </Container>
   );
 };

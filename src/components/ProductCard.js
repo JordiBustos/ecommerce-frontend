@@ -126,8 +126,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }) => {
           top: 8,
           right: 8,
           zIndex: 1,
-          bgcolor: "white",
-          boxShadow: 1,
+          bgcolor: "transparent",
           "&:hover": {
             bgcolor: "white",
           },

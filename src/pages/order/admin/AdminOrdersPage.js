@@ -261,6 +261,21 @@ const AdminOrdersPage = () => {
         row.created_at ? new Date(row.created_at).toLocaleDateString() : "N/A",
     },
     {
+      header: "Coupon",
+      render: (row) => (
+        row.coupon_code ? (
+          <Chip
+            label={row.coupon_code}
+            size="small"
+            color="success"
+            variant="outlined"
+          />
+        ) : (
+          <Typography variant="body2" color="text.secondary">—</Typography>
+        )
+      ),
+    },
+    {
       field: "actions",
       header: "Actions",
       render: (row) => (

@@ -42,7 +42,7 @@ const ProductsPage = () => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const { categories } = useCategories(); // Get categories from context
+  const { categories } = useCategories();
   const [brands, setBrands] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
@@ -51,7 +51,7 @@ const ProductsPage = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllBrands, setShowAllBrands] = useState(false);
-  const [categoryPath, setCategoryPath] = useState([]); // Track drill-down path
+  const [categoryPath, setCategoryPath] = useState([]);
   const itemsPerPage = 12;
   const { addToCart } = useCart();
   const { enqueueSnackbar } = useSnackbar();
@@ -74,7 +74,7 @@ const ProductsPage = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearchQuery(searchInput);
-    }, 500); // Wait 500ms after user stops typing
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [searchInput]);
